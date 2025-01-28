@@ -1,0 +1,31 @@
+import multer from 'multer';
+import { v4 as uuid } from 'uuid';
+
+const allowedMimeTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, process.env.UPLOAD_DIR || 'uploads'); // Directorio de destino
+  },
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split('.').pop().toLowerCase();
+    const uniqueName = `${uuid()}.${ext}`;
+    cb(null, uniqueName);
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true); // Acepta el archivo
+  } else {
+    cb(new Error('Invalid file type. Only PNG, JPEG, and PDF are allowed.'), false); // Rechaza el archivo
+  }
+};
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // Tamaño máximo: 5 MB
+  fileFilter
+});
+
+export default upload;
