@@ -1,20 +1,20 @@
-# Imagen base oficial de Node.js
+# Usar imagen base de Node.js
 FROM node:18
 
 # Establecer directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copiar los archivos de dependencias
-COPY package*.json ./
+# Copiar archivos de dependencias
+COPY package.json package-lock.json ./
 
-# Instalar dependencias (producción únicamente)
-RUN npm install --production
+# Instalar dependencias de producción
+RUN npm ci --only=production
 
-# Copiar el resto de los archivos del proyecto
+# Copiar el resto del código de la aplicación
 COPY . .
 
-# Exponer el puerto que usa tu aplicación
-EXPOSE 8080
+# Configurar variable de entorno para producción
+ENV NODE_ENV=production
 
-# Comando para iniciar la aplicación
-CMD ["npm", "start"]
+# Usar el puerto que Back4App asigne automáticamente
+CMD ["node", "server.js"]
