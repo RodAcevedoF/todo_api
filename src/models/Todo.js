@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+import db from "../config/db.js";
 
 export default class Todo {
   static async create(userId, { title, description, deadline, fileUrl }) {
@@ -25,7 +25,7 @@ export default class Todo {
   static async update(id, userId, updates) {
     const setClause = Object.keys(updates)
       .map((key, index) => `${key} = $${index + 3}`)
-      .join(', ');
+      .join(", ");
     const { rows } = await db.query(
       `UPDATE todos 
        SET ${setClause} 

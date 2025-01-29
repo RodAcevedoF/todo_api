@@ -70,38 +70,40 @@
  *         description: Invalid credentials
  */
 
-
-import { Router } from 'express';
-import { check } from 'express-validator';
-import { register, login, logout } from '../controllers/auth.controller.js';
-import { authenticate } from '../middlewares/auth.js';
-import { loginRateLimiter, registerRateLimiter } from '../middlewares/rateLimit.js';
+import { Router } from "express";
+import { check } from "express-validator";
+import { register, login, logout } from "../controllers/auth.controller.js";
+import { authenticate } from "../middlewares/auth.js";
+import {
+  loginRateLimiter,
+  registerRateLimiter
+} from "../middlewares/rateLimit.js";
 
 const router = Router();
 
 router.post(
-  '/register',
+  "/register",
   registerRateLimiter,
   [
-    check('name').notEmpty().withMessage('Name is required'),
-    check('email').isEmail().withMessage('Invalid email format'),
-    check('password')
+    check("name").notEmpty().withMessage("Name is required"),
+    check("email").isEmail().withMessage("Invalid email format"),
+    check("password")
       .isLength({ min: 6 })
-      .withMessage('Password must be at least 6 characters long')
+      .withMessage("Password must be at least 6 characters long")
   ],
   register
 );
 
 router.post(
-  '/login',
+  "/login",
   loginRateLimiter,
   [
-    check('email').isEmail().withMessage('Invalid email format'),
-    check('password').notEmpty().withMessage('Password is required')
+    check("email").isEmail().withMessage("Invalid email format"),
+    check("password").notEmpty().withMessage("Password is required")
   ],
   login
 );
 
-router.post('/logout', authenticate, logout);
+router.post("/logout", authenticate, logout);
 
 export default router;

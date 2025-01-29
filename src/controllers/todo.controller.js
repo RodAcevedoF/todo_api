@@ -1,25 +1,22 @@
-import { validationResult } from 'express-validator';
-import Todo from '../models/Todo.js';
-import upload from '../config/upload.js';
-import db from '../config/db.js';
-import { successResponse, errorResponse } from '../utils/apiResponse.js';
-import path from 'path';
-import fs from 'fs';
-import config from '../config/config.js'; // Cambia a la configuración que uses
+import { validationResult } from "express-validator";
+import Todo from "../models/Todo.js";
+import upload from "../config/upload.js";
+import db from "../config/db.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
+import path from "path";
+import fs from "fs";
+import config from "../config/config.js"; 
 
-// Middleware para manejar la carga de archivos
-export const uploadFile = upload.single('file');
+export const uploadFile = upload.single("file");
 
 export const createTodo = async (req, res) => {
-  // Manejo de validaciones
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      error: errors.array().map(err => err.msg)
+      error: errors.array().map((err) => err.msg)
     });
   }
-
   try {
     const { title, description, deadline } = req.body;
     const fileUrl = req.file ? req.file.path : null;
@@ -44,12 +41,11 @@ export const createTodo = async (req, res) => {
 };
 
 export const updateTodo = async (req, res) => {
-  // Manejo de validaciones
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      error: errors.array().map(err => err.msg)
+      error: errors.array().map((err) => err.msg)
     });
   }
 
@@ -57,16 +53,12 @@ export const updateTodo = async (req, res) => {
     const updates = req.body;
     if (req.file) updates.fileUrl = req.file.path;
 
-    const updatedTodo = await Todo.update(
-      req.params.id,
-      req.user.id,
-      updates
-    );
+    const updatedTodo = await Todo.update(req.params.id, req.user.id, updates);
 
     if (!updatedTodo) {
       return res.status(404).json({
         success: false,
-        error: 'Todo not found'
+        error: "Todo not found"
       });
     }
 
@@ -85,12 +77,12 @@ export const updateTodo = async (req, res) => {
 export const deleteTodo = async (req, res) => {
   try {
     const { rowCount } = await db.query(
-      'DELETE FROM todos WHERE id = $1 AND user_id = $2',
+      "DELETE FROM todos WHERE id = $1 AND user_id = $2",
       [req.params.id, req.user.id]
     );
 
     if (rowCount === 0) {
-      return errorResponse(res, 'Todo not found', 404);
+      return errorResponse(res, "Todo not found", 404);
     }
 
     successResponse(res, null, 204);
@@ -118,23 +110,23 @@ export const getTodos = async (req, res) => {
 
 export const getFile = async (req, res) => {
   try {
-    const filePath = path.join(config.uploadDir || 'uploads', req.params.filename);
+    const filePath = path.join(
+      config.uploadDir || "uploads",
+      req.params.filename
+    );
 
-    // Verifica si el archivo existe
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({
         success: false,
-        error: 'File not found'
+        error: "File not found"
       });
     }
 
-    // Sirve el archivo de manera segura
     res.sendFile(filePath);
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Error serving file'
+      error: "Error serving file"
     });
   }
 };
-

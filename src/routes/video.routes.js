@@ -71,27 +71,26 @@
  *         description: Validation error
  */
 
-
-import { Router } from 'express';
-import { check } from 'express-validator';
-import { authenticate } from '../middlewares/auth.js';
-import { createVideo, getVideos } from '../controllers/video.controller.js';
+import { Router } from "express";
+import { check } from "express-validator";
+import { authenticate } from "../middlewares/auth.js";
+import { createVideo, getVideos } from "../controllers/video.controller.js";
 
 const router = Router();
 
 router.use(authenticate);
 
 router.post(
-  '/',
+  "/",
   [
-    check('videoId').notEmpty().withMessage('Video ID is required'),
-    check('title').notEmpty().withMessage('Title is required'),
-    check('channel').notEmpty().withMessage('Channel is required'),
-    check('notes').optional().isString().withMessage('Notes must be a string')
+    check("videoId").notEmpty().withMessage("Video ID is required"),
+    check("title").notEmpty().withMessage("Title is required"),
+    check("channel").notEmpty().withMessage("Channel is required"),
+    check("notes").optional().isString().withMessage("Notes must be a string")
   ],
   createVideo
 );
 
-router.get('/', getVideos);
+router.get("/", getVideos);
 
 export default router;

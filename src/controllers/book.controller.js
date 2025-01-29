@@ -1,14 +1,16 @@
-import { validationResult } from 'express-validator';
-import Book from '../models/Book.js';
-import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import { validationResult } from "express-validator";
+import Book from "../models/Book.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const createBook = async (req, res) => {
-  // Manejo de validaciones
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return errorResponse(res, errors.array().map(err => err.msg), 400);
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
   }
-
   try {
     const book = await Book.create(req.user.id, req.body);
     successResponse(res, book, 201);
@@ -31,7 +33,7 @@ export const getBooks = async (req, res) => {
 export const deleteBook = async (req, res) => {
   try {
     const deleted = await Book.delete(req.params.id, req.user.id);
-    if (!deleted) return errorResponse(res, 'Book not found', 404);
+    if (!deleted) return errorResponse(res, "Book not found", 404);
     successResponse(res, null, 204);
   } catch (error) {
     errorResponse(res, error.message);

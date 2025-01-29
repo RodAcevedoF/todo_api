@@ -1,14 +1,16 @@
-import { validationResult } from 'express-validator';
-import Video from '../models/Video.js';
-import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import { validationResult } from "express-validator";
+import Video from "../models/Video.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const createVideo = async (req, res) => {
-  // Manejo de validaciones
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return errorResponse(res, errors.array().map(err => err.msg), 400);
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
   }
-
   try {
     const video = await Video.create(req.user.id, req.body);
     successResponse(res, video, 201);
@@ -27,4 +29,3 @@ export const getVideos = async (req, res) => {
     errorResponse(res, error.message);
   }
 };
-

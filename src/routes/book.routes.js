@@ -85,28 +85,31 @@
  *         description: Book not found
  */
 
-
-import { Router } from 'express';
-import { check } from 'express-validator';
-import { authenticate } from '../middlewares/auth.js';
-import { createBook, getBooks, deleteBook } from '../controllers/book.controller.js';
+import { Router } from "express";
+import { check } from "express-validator";
+import { authenticate } from "../middlewares/auth.js";
+import {
+  createBook,
+  getBooks,
+  deleteBook
+} from "../controllers/book.controller.js";
 
 const router = Router();
 
 router.use(authenticate);
 
 router.post(
-  '/',
+  "/",
   [
-    check('title').notEmpty().withMessage('Title is required'),
-    check('author').notEmpty().withMessage('Author is required'),
-    check('notes').optional().isString().withMessage('Notes must be a string')
+    check("title").notEmpty().withMessage("Title is required"),
+    check("author").notEmpty().withMessage("Author is required"),
+    check("notes").optional().isString().withMessage("Notes must be a string")
   ],
   createBook
 );
 
-router.get('/', getBooks);
+router.get("/", getBooks);
 
-router.delete('/:id', deleteBook);
+router.delete("/:id", deleteBook);
 
 export default router;

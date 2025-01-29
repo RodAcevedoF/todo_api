@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -13,10 +13,9 @@ const config = {
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES || '1d'
+    expiresIn: process.env.JWT_EXPIRES || "1d"
   },
-  uploadDir: process.env.UPLOAD_DIR || './uploads'
+  uploadDir: process.env.UPLOAD_DIR || "./uploads"
 };
 
 export default config;
-

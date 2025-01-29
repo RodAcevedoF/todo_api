@@ -1,5 +1,5 @@
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const transports = [];
 
@@ -15,27 +15,26 @@ transports.push(
   })
 );
 
-// Rotación diaria para logs en producción
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   transports.push(
     new DailyRotateFile({
-      filename: 'logs/error-%DATE%.log',
-      level: 'error',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '1m', // Tamaño máximo por archivo: 1 MB
-      maxFiles: '14d' // Mantener logs de los últimos 14 días
+      filename: "logs/error-%DATE%.log",
+      level: "error",
+      datePattern: "YYYY-MM-DD",
+      maxSize: "1m",
+      maxFiles: "14d"
     }),
     new DailyRotateFile({
-      filename: 'logs/combined-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '1m',
-      maxFiles: '14d'
+      filename: "logs/combined-%DATE%.log",
+      datePattern: "YYYY-MM-DD",
+      maxSize: "1m",
+      maxFiles: "14d"
     })
   );
 }
 
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  level: process.env.NODE_ENV === "development" ? "debug" : "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {

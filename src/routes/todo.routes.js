@@ -129,23 +129,26 @@
  *         description: Todo not found
  */
 
-
-import { Router } from 'express';
-import { authenticate } from '../middlewares/auth.js';
-import { uploadMiddleware } from '../middlewares/upload.js';
-import { createTodo, getTodos, updateTodo, deleteTodo, getFile } from '../controllers/todo.controller.js';
+import { Router } from "express";
+import { authenticate } from "../middlewares/auth.js";
+import { uploadMiddleware } from "../middlewares/upload.js";
+import {
+  createTodo,
+  getTodos,
+  updateTodo,
+  deleteTodo,
+  getFile
+} from "../controllers/todo.controller.js";
 
 const router = Router();
 
 router.use(authenticate);
 
-// Rutas para tareas
-router.post('/', uploadMiddleware, createTodo);
-router.get('/', getTodos);
-router.put('/:id', uploadMiddleware, updateTodo);
-router.delete('/:id', deleteTodo);
+router.post("/", uploadMiddleware, createTodo);
+router.get("/", getTodos);
+router.put("/:id", uploadMiddleware, updateTodo);
+router.delete("/:id", deleteTodo);
 
-// Servir archivos
-router.get('/file/:filename', getFile);
+router.get("/file/:filename", getFile);
 
 export default router;

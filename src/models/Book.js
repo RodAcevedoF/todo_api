@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+import db from "../config/db.js";
 
 export default class Book {
   static async create(userId, { apiId, title, author, notes }) {
@@ -24,7 +24,7 @@ export default class Book {
 
   static async delete(id, userId) {
     const { rowCount } = await db.query(
-      'DELETE FROM books WHERE id = $1 AND user_id = $2',
+      "DELETE FROM books WHERE id = $1 AND user_id = $2",
       [id, userId]
     );
     return rowCount > 0;

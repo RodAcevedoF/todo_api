@@ -1,3 +1,3 @@
-import upload from '../config/upload.js';
+import upload from "../config/upload.js";
 
-export const uploadMiddleware = upload.single('file');
+export const uploadMiddleware = upload.single("file");
