@@ -18,6 +18,15 @@ import helmet from "helmet";
 const app = express();
 const allowedOrigins = ["http://localhost:3000", "https://mi-dominio.com"];
 
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  next();
+});
+
+app.get('/ping', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
+
 // Middlewares
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(helmet());
@@ -70,6 +79,6 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
-app.listen(config.port, () =>
+app.listen(config.port, "0.0.0.0", () =>
   console.log(`Server running on port ${config.port}`)
 );

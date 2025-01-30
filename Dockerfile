@@ -17,4 +17,4 @@ COPY . .
 ENV NODE_ENV=production
 
 # Usar el puerto que Back4App asigne automáticamente
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
