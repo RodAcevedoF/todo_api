@@ -16,7 +16,10 @@ import compression from "compression";
 import helmet from "helmet";
 
 const app = express();
-const allowedOrigins = ["http://localhost:3000", "https://mi-dominio.com"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://api-to-do.duckdns.org" 
+];
 
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
@@ -36,10 +39,13 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error(`CORS bloqueado para: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
   })
 );
 app.use(compression());
