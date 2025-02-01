@@ -52,7 +52,8 @@ export const login = async (req, res) => {
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    const token = User.generateToken(user);
+    const token = User.generateToken({ id: user.id });
+
     successResponse(res, {
       user: { id: user.id, name: user.name, email: user.email },
       token
