@@ -1,80 +1,28 @@
 /**
  * @swagger
- * components:
- *   schemas:
- *     Video:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: The video ID
- *         videoId:
- *           type: string
- *           description: The ID of the video from YouTube
- *         title:
- *           type: string
- *           description: The title of the video
- *         channel:
- *           type: string
- *           description: The channel that uploaded the video
- *         notes:
- *           type: string
- *           description: Notes about the video
- *       required:
- *         - videoId
- *         - title
- *         - channel
- */
-
-/**
- * @swagger
- * /videos:
- *   get:
- *     summary: Get all videos for the authenticated user
+ * /videos/{id}:
+ *   delete:
+ *     summary: Delete a video by ID
  *     tags: [Videos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The video ID
  *     responses:
  *       200:
- *         description: List of videos
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Video'
+ *         description: Video deleted successfully
+ *       404:
+ *         description: Video not found or not authorized
  */
 
-/**
- * @swagger
- * /videos:
- *   post:
- *     summary: Create a new video
- *     tags: [Videos]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               videoId:
- *                 type: string
- *               title:
- *                 type: string
- *               channel:
- *                 type: string
- *               notes:
- *                 type: string
- *     responses:
- *       201:
- *         description: Video created successfully
- *       400:
- *         description: Validation error
- */
 
 import { Router } from "express";
 import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
-import { createVideo, getVideos } from "../controllers/video.controller.js";
+import { createVideo, getVideos, deleteVideo } from "../controllers/video.controller.js";
 
 const router = Router();
 
@@ -92,5 +40,7 @@ router.post(
 );
 
 router.get("/", getVideos);
+
+router.delete("/:id", deleteVideo);
 
 export default router;

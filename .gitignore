@@ -12,6 +12,3 @@ uploads/
 # Archivos específicos del editor
 .DS_Store
 *.log
-
-# PM2 y otras configuraciones locales
-ecosystem.config.js

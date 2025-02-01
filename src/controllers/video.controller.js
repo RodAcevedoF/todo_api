@@ -29,3 +29,16 @@ export const getVideos = async (req, res) => {
     errorResponse(res, error.message);
   }
 };
+
+export const deleteVideo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedVideo = await Video.delete(req.user.id, id);
+    if (!deletedVideo) {
+      return errorResponse(res, 'Video no encontrado o no autorizado', 404);
+    }
+    successResponse(res, { message: 'Video eliminado con éxito' });
+  } catch (error) {
+    errorResponse(res, error.message);
+  }
+};

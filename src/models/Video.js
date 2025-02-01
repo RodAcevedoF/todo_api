@@ -21,4 +21,15 @@ export default class Video {
     );
     return rows;
   }
+
+  static async delete(userId, videoId) {
+    const { rowCount } = await db.query(
+      `DELETE FROM videos 
+       WHERE user_id = $1 AND id = $2 
+       RETURNING id`,
+      [userId, videoId]
+    );
+    return rowCount > 0;
+  }
+  
 }
