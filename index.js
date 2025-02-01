@@ -16,9 +16,10 @@ import compression from "compression";
 import helmet from "helmet";
 
 const app = express();
+app.set("trust proxy", true);
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://api-to-do.duckdns.org" 
+  "https://api-to-do.duckdns.org"
 ];
 
 app.use((req, res, next) => {
@@ -26,8 +27,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/ping', (req, res) => {
-  res.json({ message: 'Server is running!' });
+app.get("/ping", (req, res) => {
+  res.json({ message: "Server is running!" });
 });
 
 // Middlewares
