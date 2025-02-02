@@ -29,4 +29,15 @@ export default class Book {
     );
     return rowCount > 0;
   }
+
+  static async update(id, userId, { apiId, title, author, notes }) {
+    const { rows } = await db.query(
+      `UPDATE books 
+       SET api_id = $1, title = $2, author = $3, notes = $4 
+       WHERE id = $5 AND user_id = $6 
+       RETURNING *`,
+      [apiId, title, author, notes, id, userId]
+    );
+    return rows[0];
+  }
 }

@@ -42,3 +42,21 @@ export const deleteVideo = async (req, res) => {
     errorResponse(res, error.message);
   }
 };
+
+export const updateVideo = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
+  }
+  try {
+    const video = await Video.update(req.params.id, req.user.id, req.body);
+    if (!video) return errorResponse(res, "Video no encontrado", 404);
+    successResponse(res, video);
+  } catch (error) {
+    errorResponse(res, error.message);
+  }
+};

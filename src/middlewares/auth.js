@@ -33,6 +33,13 @@ export const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    console.error("Authentication error:", error);
+    if (error.name === "TokenExpiredError") {
+      return errorResponse(res, "Token has expired. Please log in again.", 401);
+    }
+    if (error.name === "JsonWebTokenError") {
+      return errorResponse(res, "Invalid token. Please log in again.", 401);
+    }
     errorResponse(res, "Authentication failed", 401);
   }
 };

@@ -39,3 +39,21 @@ export const deleteBook = async (req, res) => {
     errorResponse(res, error.message);
   }
 };
+
+export const updateBook = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
+  }
+  try {
+    const book = await Book.update(req.params.id, req.user.id, req.body);
+    if (!book) return errorResponse(res, "Book not found", 404);
+    successResponse(res, book);
+  } catch (error) {
+    errorResponse(res, error.message);
+  }
+};

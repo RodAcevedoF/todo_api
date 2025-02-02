@@ -85,13 +85,49 @@
  *         description: Book not found
  */
 
+/**
+ * @swagger
+ * /books/{id}:
+ *   put:
+ *     summary: Update a book
+ *     tags: [Books]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the book to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               author:
+ *                 type: string
+ *               notes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Book updated successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Book not found
+ */
+
 import { Router } from "express";
 import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
 import {
   createBook,
   getBooks,
-  deleteBook
+  deleteBook,
+  updateBook
 } from "../controllers/book.controller.js";
 
 const router = Router();
@@ -111,5 +147,15 @@ router.post(
 router.get("/", getBooks);
 
 router.delete("/:id", deleteBook);
+
+router.put(
+  "/:id",
+  [
+    check("title").notEmpty().withMessage("Title is required"),
+    check("author").notEmpty().withMessage("Author is required"),
+    check("notes").optional().isString().withMessage("Notes must be a string")
+  ],
+  updateBook
+);
 
 export default router;

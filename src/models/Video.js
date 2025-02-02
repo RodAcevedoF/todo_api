@@ -31,5 +31,15 @@ export default class Video {
     );
     return rowCount > 0;
   }
-  
+
+  static async update(id, userId, { videoId, title, channel, notes }) {
+    const { rows } = await db.query(
+      `UPDATE videos 
+       SET video_id = $1, title = $2, channel = $3, notes = $4 
+       WHERE id = $5 AND user_id = $6 
+       RETURNING *`,
+      [videoId, title, channel, notes, id, userId]
+    );
+    return rows[0];
+  }
 }
