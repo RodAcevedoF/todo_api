@@ -92,16 +92,26 @@
  *       404:
  *         description: User not found
  */
+// src/models/User.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 
 export default class User {
-  static async create({ name, email, password }) {
+  static async create({
+    name,
+    email,
+    password,
+    description = null,
+    profile_image = null,
+    phone = null
+  }) {
     const hashedPassword = await bcrypt.hash(password, 12);
     const { rows } = await db.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
-      [name, email, hashedPassword]
+      `INSERT INTO users (name, email, password, description, profile_image, phone) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING *`,
+      [name, email, hashedPassword, description, profile_image, phone]
     );
     return rows[0];
   }
@@ -115,7 +125,7 @@ export default class User {
 
   static async findById(id) {
     const { rows } = await db.query(
-      "SELECT id, name, email FROM users WHERE id = $1",
+      "SELECT id, name, email, description, profile_image, phone FROM users WHERE id = $1",
       [id]
     );
     return rows[0];
@@ -129,5 +139,21 @@ export default class User {
 
   static comparePassword(password, hashedPassword) {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  // Método para actualizar el perfil del usuario
+  static async update(id, updates) {
+    const setClause = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 2}`)
+      .join(", ");
+    const values = [id, ...Object.values(updates)];
+    const { rows } = await db.query(
+      `UPDATE users 
+       SET ${setClause} 
+       WHERE id = $1 
+       RETURNING id, name, email, description, profile_image, phone`,
+      values
+    );
+    return rows[0];
   }
 }

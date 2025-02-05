@@ -5,7 +5,7 @@ import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import path from "path";
 import fs from "fs";
-import config from "../config/config.js"; 
+import config from "../config/config.js";
 
 export const uploadFile = upload.single("file");
 
@@ -18,14 +18,15 @@ export const createTodo = async (req, res) => {
     });
   }
   try {
-    const { title, description, deadline } = req.body;
+    const { title, description, deadline, priority } = req.body;
     const fileUrl = req.file ? req.file.path : null;
 
     const newTodo = await Todo.create(req.user.id, {
       title,
       description,
       deadline,
-      fileUrl
+      fileUrl,
+      priority
     });
 
     res.status(201).json({

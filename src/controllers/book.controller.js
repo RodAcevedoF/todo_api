@@ -12,7 +12,11 @@ export const createBook = async (req, res) => {
     );
   }
   try {
-    const book = await Book.create(req.user.id, req.body);
+    const { cover_image, ...bookData } = req.body;
+    const book = await Book.create(req.user.id, {
+      ...bookData,
+      cover_image: cover_image || null
+    });
     successResponse(res, book, 201);
   } catch (error) {
     errorResponse(res, error.message);
@@ -50,7 +54,11 @@ export const updateBook = async (req, res) => {
     );
   }
   try {
-    const book = await Book.update(req.params.id, req.user.id, req.body);
+    const { cover_image, ...bookData } = req.body;
+    const book = await Book.update(req.params.id, req.user.id, {
+      ...bookData,
+      cover_image: cover_image || null
+    });
     if (!book) return errorResponse(res, "Book not found", 404);
     successResponse(res, book);
   } catch (error) {

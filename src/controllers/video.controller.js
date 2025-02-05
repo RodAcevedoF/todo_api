@@ -12,7 +12,11 @@ export const createVideo = async (req, res) => {
     );
   }
   try {
-    const video = await Video.create(req.user.id, req.body);
+    const { thumbnail, ...videoData } = req.body;
+    const video = await Video.create(req.user.id, {
+      ...videoData,
+      thumbnail: thumbnail || null
+    });
     successResponse(res, video, 201);
   } catch (error) {
     errorResponse(res, error.message);
@@ -35,9 +39,9 @@ export const deleteVideo = async (req, res) => {
     const { id } = req.params;
     const deletedVideo = await Video.delete(req.user.id, id);
     if (!deletedVideo) {
-      return errorResponse(res, 'Video no encontrado o no autorizado', 404);
+      return errorResponse(res, "Video not found or unauthorized", 404);
     }
-    successResponse(res, { message: 'Video eliminado con éxito' });
+    successResponse(res, { message: "Video deleted successfully" });
   } catch (error) {
     errorResponse(res, error.message);
   }
@@ -53,8 +57,12 @@ export const updateVideo = async (req, res) => {
     );
   }
   try {
-    const video = await Video.update(req.params.id, req.user.id, req.body);
-    if (!video) return errorResponse(res, "Video no encontrado", 404);
+    const { thumbnail, ...videoData } = req.body;
+    const video = await Video.update(req.params.id, req.user.id, {
+      ...videoData,
+      thumbnail: thumbnail || null
+    });
+    if (!video) return errorResponse(res, "Video not found", 404);
     successResponse(res, video);
   } catch (error) {
     errorResponse(res, error.message);

@@ -1,28 +1,11 @@
 /**
  * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: The user ID
- *         name:
- *           type: string
- *           description: The user's name
- *         email:
- *           type: string
- *           description: The user's email
- *       required:
- *         - name
- *         - email
- *         - password
- */
-
-/**
+ * tags:
+ *   name: Auth
+ *   description: Endpoints for user authentication and profile management
+ *
  * @swagger
- * /auth/register:
+ * /api/auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
@@ -32,23 +15,27 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
  *             properties:
  *               name:
  *                 type: string
+ *                 example: John Doe
  *               email:
  *                 type: string
+ *                 example: john@example.com
  *               password:
  *                 type: string
+ *                 example: secret123
  *     responses:
  *       201:
  *         description: User registered successfully
  *       400:
- *         description: Validation error
- */
-
-/**
- * @swagger
- * /auth/login:
+ *         description: Invalid input or email already registered
+ *
+ * /api/auth/login:
  *   post:
  *     summary: Log in a user
  *     tags: [Auth]
@@ -58,21 +45,66 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
+ *                 example: john@example.com
  *               password:
+ *                 type: string
+ *                 example: secret123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ *
+ * /api/auth/logout:
+ *   post:
+ *     summary: Log out the current user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *       400:
+ *         description: Token missing or invalid
+ *
+ * /api/auth/profile:
+ *   put:
+ *     summary: Update user profile information
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Fields to update (e.g., name, description, profile_image, phone)
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               profile_image:
+ *                 type: string
+ *               phone:
  *                 type: string
  *     responses:
  *       200:
- *         description: User logged in successfully
- *       401:
- *         description: Invalid credentials
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Invalid input
  */
 
 import { Router } from "express";
 import { check } from "express-validator";
-import { register, login, logout } from "../controllers/auth.controller.js";
+import { register, login, logout, updateProfile } from "../controllers/auth.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import {
   loginRateLimiter,
@@ -105,5 +137,7 @@ router.post(
 );
 
 router.post("/logout", authenticate, logout);
+
+router.put("/profile", authenticate, updateProfile);
 
 export default router;

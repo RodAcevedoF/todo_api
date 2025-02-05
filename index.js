@@ -6,7 +6,7 @@ import db from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import todoRoutes from "./src/routes/todo.routes.js";
 import bookRoutes from "./src/routes/book.routes.js";
-import videoRoutes from "./src/routes/video.routes.js";
+import videoRoutes from "./src/routes/videos.routes.js";
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./src/config/swagger.js";

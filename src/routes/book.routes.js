@@ -1,103 +1,100 @@
 /**
  * @swagger
- * components:
- *   schemas:
- *     Book:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: The book ID
- *         title:
- *           type: string
- *           description: The title of the book
- *         author:
- *           type: string
- *           description: The author of the book
- *         notes:
- *           type: string
- *           description: Notes about the book
- *       required:
- *         - title
- *         - author
- */
-
-/**
+ * tags:
+ *   name: Books
+ *   description: Endpoints for managing books
+ *
  * @swagger
- * /books:
- *   get:
- *     summary: Get all books for the authenticated user
- *     tags: [Books]
- *     responses:
- *       200:
- *         description: List of books
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Book'
- */
-
-/**
- * @swagger
- * /books:
+ * /api/books:
  *   post:
- *     summary: Create a new book
+ *     summary: Create a new book entry
  *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
+ *               - author
  *             properties:
+ *               apiId:
+ *                 type: string
+ *                 example: "123456"
  *               title:
  *                 type: string
+ *                 example: "Example Book"
  *               author:
  *                 type: string
+ *                 example: "Author Name"
  *               notes:
  *                 type: string
+ *                 example: "Some notes about the book"
+ *               cover_image:
+ *                 type: string
+ *                 example: "http://example.com/cover.jpg"
  *     responses:
  *       201:
  *         description: Book created successfully
  *       400:
- *         description: Validation error
- */
-
-/**
- * @swagger
- * /books/{id}:
- *   delete:
- *     summary: Delete a book
+ *         description: Invalid input
+ *
+ * /api/books:
+ *   get:
+ *     summary: Get the list of books for the authenticated user
  *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of books to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Number of books to skip
+ *     responses:
+ *       200:
+ *         description: List of books retrieved successfully
+ *
+ * /api/books/{id}:
+ *   delete:
+ *     summary: Delete a book entry
+ *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: The ID of the book to delete
+ *         description: Book ID
  *     responses:
  *       204:
  *         description: Book deleted successfully
  *       404:
  *         description: Book not found
- */
-
-/**
- * @swagger
- * /books/{id}:
+ *
+ * /api/books/{id}:
  *   put:
- *     summary: Update a book
+ *     summary: Update a book entry
  *     tags: [Books]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: The ID of the book to update
+ *         description: Book ID
  *     requestBody:
  *       required: true
  *       content:
@@ -105,17 +102,21 @@
  *           schema:
  *             type: object
  *             properties:
+ *               apiId:
+ *                 type: string
  *               title:
  *                 type: string
  *               author:
  *                 type: string
  *               notes:
  *                 type: string
+ *               cover_image:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Book updated successfully
  *       400:
- *         description: Validation error
+ *         description: Invalid input
  *       404:
  *         description: Book not found
  */
@@ -139,7 +140,8 @@ router.post(
   [
     check("title").notEmpty().withMessage("Title is required"),
     check("author").notEmpty().withMessage("Author is required"),
-    check("notes").optional().isString().withMessage("Notes must be a string")
+    check("notes").optional().isString().withMessage("Notes must be a string"),
+    check("cover_image").optional().isString().withMessage("Cover image must be a string")
   ],
   createBook
 );
@@ -153,7 +155,8 @@ router.put(
   [
     check("title").notEmpty().withMessage("Title is required"),
     check("author").notEmpty().withMessage("Author is required"),
-    check("notes").optional().isString().withMessage("Notes must be a string")
+    check("notes").optional().isString().withMessage("Notes must be a string"),
+    check("cover_image").optional().isString().withMessage("Cover image must be a string")
   ],
   updateBook
 );

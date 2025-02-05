@@ -1,67 +1,39 @@
 /**
  * @swagger
- * components:
- *   schemas:
- *     Todo:
- *       type: object
- *       properties:
- *         id:
- *           type: integer
- *           description: The todo ID
- *         title:
- *           type: string
- *           description: The title of the todo
- *         description:
- *           type: string
- *           description: The description of the todo
- *         deadline:
- *           type: string
- *           format: date-time
- *           description: The deadline for the todo
- *         fileUrl:
- *           type: string
- *           description: The URL of the attached file
- *       required:
- *         - title
- */
-
-/**
+ * tags:
+ *   name: Todos
+ *   description: Endpoints for managing todos
+ *
  * @swagger
- * /todos:
- *   get:
- *     summary: Get all todos for the authenticated user
- *     tags: [Todos]
- *     responses:
- *       200:
- *         description: List of todos
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Todo'
- */
-
-/**
- * @swagger
- * /todos:
+ * /api/todos:
  *   post:
  *     summary: Create a new todo
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
+ *       description: Todo data including an optional file and priority
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - title
  *             properties:
  *               title:
  *                 type: string
+ *                 example: "Buy groceries"
  *               description:
  *                 type: string
+ *                 example: "Milk, Bread, Eggs"
  *               deadline:
  *                 type: string
  *                 format: date-time
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high]
+ *                 example: "medium"
  *               file:
  *                 type: string
  *                 format: binary
@@ -69,24 +41,46 @@
  *       201:
  *         description: Todo created successfully
  *       400:
- *         description: Validation error
- */
-
-/**
+ *         description: Invalid input
+ *
  * @swagger
- * /todos/{id}:
- *   put:
- *     summary: Update a todo
+ * /api/todos:
+ *   get:
+ *     summary: Retrieve todos for the authenticated user
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Maximum number of todos to return
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         description: Number of todos to skip
+ *     responses:
+ *       200:
+ *         description: List of todos retrieved successfully
+ *
+ * @swagger
+ * /api/todos/{id}:
+ *   put:
+ *     summary: Update an existing todo
+ *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: The ID of the todo to update
+ *         description: Todo ID
  *     requestBody:
- *       required: true
+ *       description: Fields to update (including optional file and priority)
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -99,6 +93,9 @@
  *               deadline:
  *                 type: string
  *                 format: date-time
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high]
  *               file:
  *                 type: string
  *                 format: binary
@@ -107,26 +104,44 @@
  *         description: Todo updated successfully
  *       404:
  *         description: Todo not found
- */
-
-/**
+ *
  * @swagger
- * /todos/{id}:
+ * /api/todos/{id}:
  *   delete:
  *     summary: Delete a todo
  *     tags: [Todos]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: integer
- *         required: true
- *         description: The ID of the todo to delete
+ *         description: Todo ID
  *     responses:
  *       204:
  *         description: Todo deleted successfully
  *       404:
  *         description: Todo not found
+ *
+ * @swagger
+ * /api/todos/file/{filename}:
+ *   get:
+ *     summary: Retrieve a file associated with a todo
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The filename of the uploaded file
+ *     responses:
+ *       200:
+ *         description: File served successfully
+ *       404:
+ *         description: File not found
  */
 
 import { Router } from "express";

@@ -3,7 +3,6 @@ import DailyRotateFile from "winston-daily-rotate-file";
 
 const transports = [];
 
-// Consola (siempre habilitada)
 transports.push(
   new winston.transports.Console({
     format: winston.format.combine(

@@ -135,15 +135,18 @@
  *       404:
  *         description: Todo not found
  */
-import db from "../config/db.js";
 
+import db from "../config/db.js";
 export default class Todo {
-  static async create(userId, { title, description, deadline, fileUrl }) {
+  static async create(
+    userId,
+    { title, description, deadline, fileUrl, priority }
+  ) {
     const { rows } = await db.query(
-      `INSERT INTO todos (user_id, title, description, deadline, file_url) 
-       VALUES ($1, $2, $3, $4, $5) 
+      `INSERT INTO todos (user_id, title, description, deadline, file_url, priority) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [userId, title, description, deadline, fileUrl]
+      [userId, title, description, deadline, fileUrl, priority]
     );
     return rows[0];
   }
@@ -160,6 +163,10 @@ export default class Todo {
   }
 
   static async update(id, userId, updates) {
+    if (updates.fileUrl !== undefined) {
+      updates.file_url = updates.fileUrl;
+      delete updates.fileUrl;
+    }
     const setClause = Object.keys(updates)
       .map((key, index) => `${key} = $${index + 3}`)
       .join(", ");

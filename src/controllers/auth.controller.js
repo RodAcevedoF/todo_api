@@ -1,6 +1,6 @@
 import { validationResult } from "express-validator";
 import User from "../models/User.js";
-import db from "../config/db.js"; 
+import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const register = async (req, res) => {
@@ -22,7 +22,7 @@ export const register = async (req, res) => {
     }
 
     const user = await User.create({ name, email, password });
-    const token = User.generateToken({ id: user.id }); 
+    const token = User.generateToken({ id: user.id });
 
     successResponse(
       res,
@@ -52,8 +52,7 @@ export const login = async (req, res) => {
       return errorResponse(res, "Invalid credentials", 401);
     }
 
-    const token = User.generateToken({ id: user.id });
-
+    const token = User.generateToken(user);
     successResponse(res, {
       user: { id: user.id, name: user.name, email: user.email },
       token
@@ -78,5 +77,15 @@ export const logout = async (req, res) => {
     successResponse(res, "Successfully logged out");
   } catch (error) {
     errorResponse(res, "Logout failed", 500);
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const updates = req.body;
+    const updatedUser = await User.update(req.user.id, updates);
+    successResponse(res, updatedUser);
+  } catch (error) {
+    errorResponse(res, error.message);
   }
 };
