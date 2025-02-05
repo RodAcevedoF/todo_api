@@ -4,7 +4,6 @@
  *   name: Books
  *   description: Endpoints for managing books
  *
- * @swagger
  * /api/books:
  *   post:
  *     summary: Create a new book entry
@@ -41,8 +40,6 @@
  *         description: Book created successfully
  *       400:
  *         description: Invalid input
- *
- * /api/books:
  *   get:
  *     summary: Get the list of books for the authenticated user
  *     tags: [Books]
@@ -81,8 +78,6 @@
  *         description: Book deleted successfully
  *       404:
  *         description: Book not found
- *
- * /api/books/{id}:
  *   put:
  *     summary: Update a book entry
  *     tags: [Books]
