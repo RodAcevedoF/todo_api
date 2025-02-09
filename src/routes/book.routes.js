@@ -7,6 +7,7 @@ import {
   deleteBook,
   updateBook
 } from "../controllers/book.controller.js";
+import upload from "../config/upload.js";
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.use(authenticate);
 
 router.post(
   "/",
+  upload.none(),
   [
     check("title").notEmpty().withMessage("Title is required"),
     check("author").notEmpty().withMessage("Author is required"),
