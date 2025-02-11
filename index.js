@@ -1,5 +1,5 @@
 import express from "express";
-import bodyParser from "body-parser";
+//import bodyParser from "body-parser";
 import cors from "cors";
 import config from "./src/config/config.js";
 import db from "./src/config/db.js";
@@ -50,8 +50,8 @@ app.use(
   })
 );
 app.use(compression());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(config.uploadDir));
 
 // Logger de solicitudes

@@ -44,7 +44,7 @@ export const deleteBook = async (req, res) => {
   }
 };
 
-export const updateBook = async (req, res) => {
+/* export const updateBook = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
@@ -59,6 +59,36 @@ export const updateBook = async (req, res) => {
       ...bookData,
       cover_image: cover_image || null
     });
+    if (!book) return errorResponse(res, "Book not found", 404);
+    successResponse(res, book);
+  } catch (error) {
+    errorResponse(res, error.message);
+  }
+};
+ */
+
+export const updateBook = async (req, res) => {
+  try {
+    console.log('Datos recibidos en req.body:', req.body);
+    console.log('Archivo recibido:', req.file);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return errorResponse(
+        res,
+        errors.array().map((err) => err.msg),
+        400
+      );
+    }
+
+    const bookData = { ...req.body };
+
+    // Si recibiste un archivo, actualiza 'cover_image'
+    if (req.file) {
+      bookData.cover_image = req.file.filename;
+    }
+
+    const book = await Book.update(req.params.id, req.user.id, bookData);
     if (!book) return errorResponse(res, "Book not found", 404);
     successResponse(res, book);
   } catch (error) {
