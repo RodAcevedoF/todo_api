@@ -31,6 +31,7 @@ router.delete("/:id", deleteBook);
 
 router.put(
   "/:id",
+  upload.none(),
   [
     check("title").notEmpty().withMessage("Title is required"),
     check("author").notEmpty().withMessage("Author is required"),
