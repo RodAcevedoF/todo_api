@@ -66,7 +66,6 @@ export const deleteBook = async (req, res) => {
   }
 };
  */
-
 export const updateBook = async (req, res) => {
   try {
     console.log('Datos recibidos en req.body:', req.body);
@@ -82,32 +81,27 @@ export const updateBook = async (req, res) => {
       );
     }
 
-    // Obtener el libro existente
-    const existingBook = await Book.findById(req.params.id, req.user.id);
-    if (!existingBook) {
-      return errorResponse(res, "Book not found", 404);
-    }
-
-    // Crear 'bookData' a partir de 'req.body'
+    // Crear 'bookData' a partir de 'req.body' y 'req.file'
     const bookData = { ...req.body };
-
-    // Preservar 'apiId' del libro existente si no se envió en 'req.body'
-    if (!bookData.apiId) {
-      bookData.apiId = existingBook.api_id;
-    }
 
     // Si recibiste un archivo, actualiza 'cover_image'
     if (req.file) {
       bookData.cover_image = req.file.filename;
     }
 
+    // Verificar que 'bookData' no esté vacío
+    if (Object.keys(bookData).length === 0) {
+      return errorResponse(res, "No hay campos válidos para actualizar", 400);
+    }
+
     // Actualizar el libro
     const book = await Book.update(req.params.id, req.user.id, bookData);
 
-    // Responder con éxito
+    if (!book) return errorResponse(res, "Book not found", 404);
+
     successResponse(res, book);
   } catch (error) {
     console.error('Error al actualizar el libro:', error);
     errorResponse(res, error.message);
   }
-};  
+};
