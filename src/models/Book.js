@@ -32,6 +32,14 @@ export default class Book {
     return rowCount > 0;
   }
 
+  static async findById(id, userId) {
+    const { rows } = await db.query(
+      `SELECT * FROM books WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+    return rows[0];
+  }
+
   static async update(
     id,
     userId,

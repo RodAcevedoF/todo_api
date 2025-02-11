@@ -72,6 +72,7 @@ export const updateBook = async (req, res) => {
     console.log('Datos recibidos en req.body:', req.body);
     console.log('Archivo recibido:', req.file);
 
+    // Validar datos de entrada
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return errorResponse(
@@ -81,17 +82,32 @@ export const updateBook = async (req, res) => {
       );
     }
 
+    // Obtener el libro existente
+    const existingBook = await Book.findById(req.params.id, req.user.id);
+    if (!existingBook) {
+      return errorResponse(res, "Book not found", 404);
+    }
+
+    // Crear 'bookData' a partir de 'req.body'
     const bookData = { ...req.body };
+
+    // Preservar 'apiId' del libro existente si no se envió en 'req.body'
+    if (!bookData.apiId) {
+      bookData.apiId = existingBook.api_id;
+    }
 
     // Si recibiste un archivo, actualiza 'cover_image'
     if (req.file) {
       bookData.cover_image = req.file.filename;
     }
 
+    // Actualizar el libro
     const book = await Book.update(req.params.id, req.user.id, bookData);
-    if (!book) return errorResponse(res, "Book not found", 404);
+
+    // Responder con éxito
     successResponse(res, book);
   } catch (error) {
+    console.error('Error al actualizar el libro:', error);
     errorResponse(res, error.message);
   }
-};
+};  
