@@ -1,5 +1,6 @@
 // src/models/Video.js
 import db from "../config/db.js";
+
 export default class Video {
   static async create(
     userId,
@@ -25,28 +26,57 @@ export default class Video {
     return rows;
   }
 
-  static async delete(userId, videoId) {
+  static async findById(id, userId) {
+    const { rows } = await db.query(
+      `SELECT * FROM videos WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+    return rows[0];
+  }
+
+  static async delete(userId, id) {
     const { rowCount } = await db.query(
       `DELETE FROM videos 
-       WHERE user_id = $1 AND id = $2 
-       RETURNING id`,
-      [userId, videoId]
+       WHERE user_id = $1 AND id = $2`,
+      [userId, id]
     );
     return rowCount > 0;
   }
 
-  static async update(
-    id,
-    userId,
-    { videoId, title, channel, notes, thumbnail = null }
-  ) {
-    const { rows } = await db.query(
-      `UPDATE videos 
-       SET video_id = $1, title = $2, channel = $3, notes = $4, thumbnail = $5
-       WHERE id = $6 AND user_id = $7 
-       RETURNING *`,
-      [videoId, title, channel, notes, thumbnail, id, userId]
-    );
+  static async update(id, userId, data) {
+    // Construir dinámicamente la cláusula SET en función de los campos proporcionados
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        // Excluir 'videoId' para evitar que sea modificado
+        if (key === 'videoId') continue;
+
+        fields.push(`${key} = $${index}`);
+        values.push(data[key]);
+        index++;
+      }
+    }
+
+    // Verificar que se proporcionaron campos para actualizar
+    if (fields.length === 0) {
+      throw new Error("No hay campos válidos para actualizar");
+    }
+
+    // Añadir 'id' y 'userId' a los valores para la cláusula WHERE
+    values.push(id);
+    values.push(userId);
+
+    const query = `
+      UPDATE videos
+      SET ${fields.join(', ')}
+      WHERE id = $${index} AND user_id = $${index + 1}
+      RETURNING *
+    `;
+
+    const { rows } = await db.query(query, values);
     return rows[0];
   }
 }
