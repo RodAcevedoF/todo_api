@@ -5,20 +5,25 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 export const createVideo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log("Validation errors", errors.array());
     return errorResponse(
       res,
       errors.array().map((err) => err.msg),
       400
     );
   }
+
   try {
     const { thumbnail, ...videoData } = req.body;
+
     const video = await Video.create(req.user.id, {
       ...videoData,
-      thumbnail: thumbnail || null
+      thumbnail: req.file ? req.file.filename : thumbnail || null
     });
+
     successResponse(res, video, 201);
   } catch (error) {
+    console.error("createVideo error:", error);
     errorResponse(res, error.message);
   }
 };
@@ -39,7 +44,7 @@ export const deleteVideo = async (req, res) => {
     const { id } = req.params;
     const deletedVideo = await Video.delete(req.user.id, id);
     if (!deletedVideo) {
-      return errorResponse(res, "Video no encontrado o no autorizado", 404);
+      return errorResponse(res, "video not found or unauthorized", 404);
     }
     successResponse(res, null, 204);
   } catch (error) {
@@ -49,8 +54,6 @@ export const deleteVideo = async (req, res) => {
 
 export const updateVideo = async (req, res) => {
   try {
-    console.log('Datos recibidos en req.body:', req.body);
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return errorResponse(
@@ -61,23 +64,28 @@ export const updateVideo = async (req, res) => {
     }
 
     const videoData = { ...req.body };
+
+    if (req.file) {
+      videoData.thumbnail = req.file.filename;
+    }
+
     if (videoData.videoId) {
       delete videoData.videoId;
     }
 
     if (Object.keys(videoData).length === 0) {
-      return errorResponse(res, "No hay campos válidos para actualizar", 400);
+      return errorResponse(res, "valid fields not found", 400);
     }
 
     const video = await Video.update(req.params.id, req.user.id, videoData);
 
     if (!video) {
-      return errorResponse(res, "Video no encontrado", 404);
+      return errorResponse(res, "Video not found", 404);
     }
 
     successResponse(res, video);
   } catch (error) {
-    console.error('Error al actualizar el video:', error);
+    console.error("error on video update:", error);
     errorResponse(res, error.message);
   }
 };

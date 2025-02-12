@@ -1,149 +1,3 @@
-/**
- * @swagger
- * tags:
- *   name: Todos
- *   description: Endpoints for managing todos
- *
- * @swagger
- * /api/todos:
- *   post:
- *     summary: Create a new todo
- *     tags: [Todos]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       description: Todo data including an optional file and priority
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *             properties:
- *               title:
- *                 type: string
- *                 example: "Buy groceries"
- *               description:
- *                 type: string
- *                 example: "Milk, Bread, Eggs"
- *               deadline:
- *                 type: string
- *                 format: date-time
- *               priority:
- *                 type: string
- *                 enum: [low, medium, high]
- *                 example: "medium"
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       201:
- *         description: Todo created successfully
- *       400:
- *         description: Invalid input
- *
- * @swagger
- * /api/todos:
- *   get:
- *     summary: Retrieve todos for the authenticated user
- *     tags: [Todos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Maximum number of todos to return
- *       - in: query
- *         name: offset
- *         schema:
- *           type: integer
- *         description: Number of todos to skip
- *     responses:
- *       200:
- *         description: List of todos retrieved successfully
- *
- * @swagger
- * /api/todos/{id}:
- *   put:
- *     summary: Update an existing todo
- *     tags: [Todos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Todo ID
- *     requestBody:
- *       description: Fields to update (including optional file and priority)
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               description:
- *                 type: string
- *               deadline:
- *                 type: string
- *                 format: date-time
- *               priority:
- *                 type: string
- *                 enum: [low, medium, high]
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Todo updated successfully
- *       404:
- *         description: Todo not found
- *
- * @swagger
- * /api/todos/{id}:
- *   delete:
- *     summary: Delete a todo
- *     tags: [Todos]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Todo ID
- *     responses:
- *       204:
- *         description: Todo deleted successfully
- *       404:
- *         description: Todo not found
- *
- * @swagger
- * /api/todos/file/{filename}:
- *   get:
- *     summary: Retrieve a file associated with a todo
- *     tags: [Todos]
- *     parameters:
- *       - in: path
- *         name: filename
- *         required: true
- *         schema:
- *           type: string
- *         description: The filename of the uploaded file
- *     responses:
- *       200:
- *         description: File served successfully
- *       404:
- *         description: File not found
- */
-
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../middlewares/upload.js";
@@ -167,3 +21,134 @@ router.delete("/:id", deleteTodo);
 router.get("/file/:filename", getFile);
 
 export default router;
+/**
+ * @swagger
+ * tags:
+ *   name: Todos
+ *   description: Gestión de tareas
+ *
+ * /api/todos:
+ *   post:
+ *     summary: Crear una nueva tarea
+ *     tags: [Todos]
+ *     security:
+ *       - BearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Título de la tarea.
+ *               description:
+ *                 type: string
+ *                 description: Descripción de la tarea.
+ *               due_date:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de vencimiento de la tarea (opcional).
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo adjunto a la tarea (opcional).
+ *     responses:
+ *       201:
+ *         description: Tarea creada exitosamente.
+ *       400:
+ *         description: Error en la validación de datos.
+ *
+ *   get:
+ *     summary: Obtener todas las tareas del usuario
+ *     tags: [Todos]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de tareas obtenida correctamente.
+ *       401:
+ *         description: No autorizado.
+ *
+ * /api/todos/{id}:
+ *   put:
+ *     summary: Actualizar una tarea por ID
+ *     tags: [Todos]
+ *     security:
+ *       - BearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la tarea a actualizar.
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Nuevo título de la tarea.
+ *               description:
+ *                 type: string
+ *                 description: Nueva descripción de la tarea.
+ *               due_date:
+ *                 type: string
+ *                 format: date
+ *                 description: Nueva fecha de vencimiento de la tarea (opcional).
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Nuevo archivo adjunto a la tarea (opcional).
+ *     responses:
+ *       200:
+ *         description: Tarea actualizada exitosamente.
+ *       404:
+ *         description: Tarea no encontrada.
+ *
+ *   delete:
+ *     summary: Eliminar una tarea por ID
+ *     tags: [Todos]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la tarea a eliminar.
+ *     responses:
+ *       204:
+ *         description: Tarea eliminada exitosamente.
+ *       404:
+ *         description: Tarea no encontrada.
+ *
+ * /api/todos/file/{filename}:
+ *   get:
+ *     summary: Obtener un archivo adjunto de una tarea
+ *     tags: [Todos]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nombre del archivo a descargar.
+ *     responses:
+ *       200:
+ *         description: Archivo obtenido exitosamente.
+ *       404:
+ *         description: Archivo no encontrado.
+ */

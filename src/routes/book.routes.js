@@ -1,50 +1,3 @@
-/* import { Router } from "express";
-import { check } from "express-validator";
-import { authenticate } from "../middlewares/auth.js";
-import {
-  createBook,
-  getBooks,
-  deleteBook,
-  updateBook
-} from "../controllers/book.controller.js";
-import upload from "../config/upload.js";
-
-const router = Router();
-
-router.use(authenticate);
-
-router.post(
-  "/",
-  upload.none(),
-  [
-    check("title").notEmpty().withMessage("Title is required"),
-    check("author").notEmpty().withMessage("Author is required"),
-    check("notes").optional().isString().withMessage("Notes must be a string"),
-    check("cover_image").optional().isString().withMessage("Cover image must be a string")
-  ],
-  createBook
-);
-
-router.get("/", getBooks);
-
-router.delete("/:id", deleteBook);
-
-router.put(
-  "/:id",
-  upload.none(),
-  [
-    check("title").notEmpty().withMessage("Title is required"),
-    check("author").notEmpty().withMessage("Author is required"),
-    check("notes").optional().isString().withMessage("Notes must be a string"),
-    check("cover_image").optional().isString().withMessage("Cover image must be a string")
-  ],
-  updateBook
-);
-
-export default router;
- */
-// src/routes/book.routes.js
-
 import { Router } from "express";
 import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
@@ -54,11 +7,10 @@ import {
   deleteBook,
   updateBook
 } from "../controllers/book.controller.js";
-import upload from "../config/upload.js"; // Importa tu configuración de multer
+import upload from "../config/upload.js"; 
 
 const router = Router();
 
-// Middleware para excluir 'apiId' si se envía en la solicitud
 const excludeApiId = (req, res, next) => {
   if (req.body.apiId) {
     delete req.body.apiId;
@@ -68,10 +20,9 @@ const excludeApiId = (req, res, next) => {
 
 router.use(authenticate);
 
-// Ruta para crear un libro (maneja archivos si es necesario)
 router.post(
   "/",
-  upload.single("cover_image"), // Si no manejas archivos, puedes usar upload.none()
+  upload.single("cover_image"), 
   [
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("author").notEmpty().withMessage("El autor es obligatorio"),
@@ -80,16 +31,13 @@ router.post(
   createBook
 );
 
-// Ruta para obtener los libros del usuario autenticado
 router.get("/", getBooks);
 
-// Ruta para eliminar un libro
 router.delete("/:id", deleteBook);
 
-// Ruta para actualizar un libro (actualización parcial)
 router.patch(
   "/:id",
-  upload.single("cover_image"), // Si no manejas archivos, puedes usar upload.none()
+  upload.single("cover_image"),
   excludeApiId,
   [
     check("title").optional().isString().withMessage("El título debe ser texto"),
@@ -100,3 +48,113 @@ router.patch(
 );
 
 export default router;
+/**
+ * @swagger
+ * tags:
+ *   name: Books
+ *   description: Gestión de libros
+ *
+ * /api/books:
+ *   post:
+ *     summary: Crear un nuevo libro
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Título del libro.
+ *               author:
+ *                 type: string
+ *                 description: Autor del libro.
+ *               notes:
+ *                 type: string
+ *                 description: Notas sobre el libro (opcional).
+ *               cover_image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Imagen de portada del libro (opcional).
+ *     responses:
+ *       201:
+ *         description: Libro creado exitosamente.
+ *       400:
+ *         description: Error en la validación de datos.
+ *
+ *   get:
+ *     summary: Obtener todos los libros del usuario
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de libros obtenida correctamente.
+ *       401:
+ *         description: No autorizado.
+ *
+ * /api/books/{id}:
+ *   delete:
+ *     summary: Eliminar un libro por ID
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del libro a eliminar.
+ *     responses:
+ *       204:
+ *         description: Libro eliminado exitosamente.
+ *       404:
+ *         description: Libro no encontrado.
+ *
+ *   patch:
+ *     summary: Actualizar un libro por ID
+ *     tags: [Books]
+ *     security:
+ *       - BearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del libro a actualizar.
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: Nuevo título del libro.
+ *               author:
+ *                 type: string
+ *                 description: Nuevo autor del libro.
+ *               notes:
+ *                 type: string
+ *                 description: Nuevas notas sobre el libro (opcional).
+ *               cover_image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Nueva imagen de portada del libro (opcional).
+ *     responses:
+ *       200:
+ *         description: Libro actualizado exitosamente.
+ *       404:
+ *         description: Libro no encontrado.
+ */

@@ -1,107 +1,3 @@
-/**
- * @swagger
- * tags:
- *   name: Auth
- *   description: Endpoints for user authentication and profile management
- *
- * @swagger
- * /api/auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
- *             properties:
- *               name:
- *                 type: string
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 example: john@example.com
- *               password:
- *                 type: string
- *                 example: secret123
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Invalid input or email already registered
- *
- * /api/auth/login:
- *   post:
- *     summary: Log in a user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 example: john@example.com
- *               password:
- *                 type: string
- *                 example: secret123
- *     responses:
- *       200:
- *         description: Login successful
- *       401:
- *         description: Invalid credentials
- *
- * /api/auth/logout:
- *   post:
- *     summary: Log out the current user
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully logged out
- *       400:
- *         description: Token missing or invalid
- *
- * /api/auth/profile:
- *   put:
- *     summary: Update user profile information
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       description: Fields to update (e.g., name, description, profile_image, phone)
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               profile_image:
- *                 type: string
- *               phone:
- *                 type: string
- *     responses:
- *       200:
- *         description: Profile updated successfully
- *       400:
- *         description: Invalid input
- */
-
 import { Router } from "express";
 import { check } from "express-validator";
 import { register, login, logout, updateProfile } from "../controllers/auth.controller.js";
@@ -141,3 +37,102 @@ router.post("/logout", authenticate, logout);
 router.put("/profile", authenticate, updateProfile);
 
 export default router;
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Gestión de autenticación de usuarios
+ *
+ * /api/auth/register:
+ *   post:
+ *     summary: Registrar un nuevo usuario
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nombre del usuario.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico del usuario.
+ *               password:
+ *                 type: string
+ *                 description: Contraseña (mínimo 6 caracteres).
+ *     responses:
+ *       201:
+ *         description: Usuario registrado exitosamente.
+ *       400:
+ *         description: Error en la validación de datos.
+ *
+ * /api/auth/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico del usuario.
+ *               password:
+ *                 type: string
+ *                 description: Contraseña del usuario.
+ *     responses:
+ *       200:
+ *         description: Inicio de sesión exitoso.
+ *       401:
+ *         description: Credenciales incorrectas.
+ *
+ * /api/auth/logout:
+ *   post:
+ *     summary: Cerrar sesión
+ *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cierre de sesión exitoso.
+ *       401:
+ *         description: No autorizado.
+ *
+ * /api/auth/profile:
+ *   put:
+ *     summary: Actualizar perfil del usuario
+ *     tags: [Auth]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nuevo nombre del usuario.
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Nuevo correo electrónico.
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado exitosamente.
+ *       400:
+ *         description: Error en la validación de datos.
+ *       401:
+ *         description: No autorizado.
+ */
+
+
