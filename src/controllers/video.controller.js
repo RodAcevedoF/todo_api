@@ -45,14 +45,12 @@ export const deleteVideo = async (req, res) => {
   } catch (error) {
     errorResponse(res, error.message);
   }
-}
+};
 
 export const updateVideo = async (req, res) => {
   try {
     console.log('Datos recibidos en req.body:', req.body);
-    console.log('Archivo recibido:', req.file);
 
-    // Validar datos de entrada
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return errorResponse(
@@ -62,25 +60,15 @@ export const updateVideo = async (req, res) => {
       );
     }
 
-    // Crear 'videoData' a partir de 'req.body'
     const videoData = { ...req.body };
-
-    // Excluir 'videoId' para evitar que sea modificado
     if (videoData.videoId) {
       delete videoData.videoId;
     }
 
-    // Si recibiste un archivo, actualiza 'thumbnail'
-    if (req.file) {
-      videoData.thumbnail = req.file.filename;
-    }
-
-    // Verificar que 'videoData' no esté vacío
     if (Object.keys(videoData).length === 0) {
       return errorResponse(res, "No hay campos válidos para actualizar", 400);
     }
 
-    // Actualizar el video
     const video = await Video.update(req.params.id, req.user.id, videoData);
 
     if (!video) {

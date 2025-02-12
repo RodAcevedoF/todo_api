@@ -135,7 +135,6 @@ import {
   deleteVideo,
   updateVideo
 } from "../controllers/video.controller.js";
-import upload from "../config/upload.js";
 
 const router = Router();
 
@@ -149,16 +148,15 @@ const excludeVideoId = (req, res, next) => {
 
 router.use(authenticate);
 
-// Ruta para crear un video (maneja archivos si es necesario)
+// Ruta para crear un video
 router.post(
   "/",
-  upload.single("thumbnail"), // Si manejas archivos al crear un video
   [
     check("videoId").notEmpty().withMessage("El ID del video es obligatorio"),
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("channel").notEmpty().withMessage("El canal es obligatorio"),
+    check("thumbnail").notEmpty().isString().withMessage("El thumbnail debe ser una URL"),
     check("notes").optional().isString().withMessage("Las notas deben ser texto")
-    // No validamos 'thumbnail' aquí; se maneja con multer
   ],
   createVideo
 );
@@ -167,16 +165,15 @@ router.get("/", getVideos);
 
 router.delete("/:id", deleteVideo);
 
-// Ruta para actualizar un video (permite actualizaciones parciales)
+// Ruta para actualizar un video
 router.patch(
   "/:id",
-  upload.single("thumbnail"), // Aplica el middleware de multer si manejas archivos
-  excludeVideoId, // Middleware para excluir 'videoId' del req.body
+  excludeVideoId,
   [
     check("title").optional().isString().withMessage("El título debe ser texto"),
     check("channel").optional().isString().withMessage("El canal debe ser texto"),
+    check("thumbnail").optional().isString().withMessage("El thumbnail debe ser una URL"),
     check("notes").optional().isString().withMessage("Las notas deben ser texto")
-    // No validamos 'thumbnail' aquí; se maneja con multer
   ],
   updateVideo
 );

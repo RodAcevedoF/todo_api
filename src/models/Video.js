@@ -1,6 +1,4 @@
-// src/models/Video.js
 import db from "../config/db.js";
-
 export default class Video {
   static async create(
     userId,
@@ -44,14 +42,12 @@ export default class Video {
   }
 
   static async update(id, userId, data) {
-    // Construir dinámicamente la cláusula SET en función de los campos proporcionados
     const fields = [];
     const values = [];
     let index = 1;
 
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
-        // Excluir 'videoId' para evitar que sea modificado
         if (key === 'videoId') continue;
 
         fields.push(`${key} = $${index}`);
@@ -60,12 +56,10 @@ export default class Video {
       }
     }
 
-    // Verificar que se proporcionaron campos para actualizar
     if (fields.length === 0) {
       throw new Error("No hay campos válidos para actualizar");
     }
 
-    // Añadir 'id' y 'userId' a los valores para la cláusula WHERE
     values.push(id);
     values.push(userId);
 
