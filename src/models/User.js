@@ -37,7 +37,7 @@ export default class User {
 
   static generateToken(user) {
     return jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES || "1h"
+      expiresIn: process.env.JWT_EXPIRES || "4h"
     });
   }
 

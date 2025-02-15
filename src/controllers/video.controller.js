@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator";
+/* import { validationResult } from "express-validator";
 import Video from "../models/Video.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
@@ -89,3 +89,4 @@ export const updateVideo = async (req, res) => {
     errorResponse(res, error.message);
   }
 };
+ */

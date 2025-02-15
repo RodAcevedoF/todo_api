@@ -1,20 +1,14 @@
 import { Router } from "express";
 import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
-import {
-  createBook,
-  getBooks,
-  deleteBook,
-  updateBook
-} from "../controllers/book.controller.js";
-import upload from "../config/upload.js"; 
+import { createBook, getBooks, deleteBook, updateBook } from "../controllers/book.controller.js";
+import upload from "../config/upload.js";
 
 const router = Router();
 
+// Middleware para eliminar apiId en actualización (no se debe actualizar)
 const excludeApiId = (req, res, next) => {
-  if (req.body.apiId) {
-    delete req.body.apiId;
-  }
+  if (req.body.apiId) delete req.body.apiId;
   next();
 };
 
@@ -22,7 +16,7 @@ router.use(authenticate);
 
 router.post(
   "/",
-  upload.single("cover_image"), 
+  upload.single("cover_image"),
   [
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("author").notEmpty().withMessage("El autor es obligatorio"),
@@ -48,6 +42,7 @@ router.patch(
 );
 
 export default router;
+
 /**
  * @swagger
  * tags:
