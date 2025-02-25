@@ -19,6 +19,7 @@ app.set("trust proxy", true);
 const allowedOrigins = [
   "http://localhost:5173",
    "http://localhost:5175",
+   "http://localhost:5174",
   "https://api-to-do.duckdns.org"
 ];
 
