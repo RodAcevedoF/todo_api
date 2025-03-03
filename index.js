@@ -20,7 +20,8 @@ const allowedOrigins = [
   "http://localhost:5173",
    "http://localhost:5175",
    "http://localhost:5174",
-  "https://api-to-do.duckdns.org"
+  "https://api-to-do.duckdns.org",
+  "https://service.todo-api.site"
 ];
 
 app.use((req, res, next) => {
