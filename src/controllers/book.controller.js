@@ -32,11 +32,21 @@ export const getBooks = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
     const books = await Book.findByUser(req.user.id, limit, offset);
-    return successResponse(res, books);
+
+    // Formatear publish_date para eliminar la hora y mantener solo YYYY-MM-DD
+    const formattedBooks = books.map((book) => ({
+      ...book,
+      publish_date: book.publish_date
+        ? book.publish_date.toISOString().split("T")[0] // Extrae solo la parte de la fecha
+        : null,
+    }));
+
+    return successResponse(res, formattedBooks);
   } catch (error) {
     return errorResponse(res, error.message);
   }
 };
+
 
 export const deleteBook = async (req, res) => {
   try {
