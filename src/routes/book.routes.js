@@ -20,7 +20,8 @@ router.post(
   [
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("author").notEmpty().withMessage("El autor es obligatorio"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto")
+    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
+    check('isbn').optional().isString().withMessage('El ISBN debe ser un texto')
   ],
   createBook
 );
@@ -36,7 +37,8 @@ router.patch(
   [
     check("title").optional().isString().withMessage("El título debe ser texto"),
     check("author").optional().isString().withMessage("El autor debe ser texto"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto")
+    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
+    check('isbn').optional().isString().withMessage('El ISBN debe ser un texto')
   ],
   updateBook
 );
@@ -73,6 +75,9 @@ export default router;
  *               notes:
  *                 type: string
  *                 description: Notas sobre el libro (opcional).
+ *               isbn:
+                   type: string
+                   description: ISBN del libro (opcional).
  *               cover_image:
  *                 type: string
  *                 format: binary
@@ -143,6 +148,9 @@ export default router;
  *               notes:
  *                 type: string
  *                 description: Nuevas notas sobre el libro (opcional).
+ *               isbn:
+                   type: string
+                   description: ISBN del libro (opcional). 
  *               cover_image:
  *                 type: string
  *                 format: binary
