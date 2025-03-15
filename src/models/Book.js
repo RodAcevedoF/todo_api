@@ -11,15 +11,15 @@ export default class Book {
   }
 
   // Crea un nuevo libro, si no existe previamente
-  static async create(userId, { apiId, title, author, notes, cover_image = null, isbn = null }) {
+  static async create(userId, { apiId, title, author, notes, cover_image = null, isbn = null, description = null, publisher = null, publish_date = null }) {
     if (await this.exists(userId, apiId)) {
       throw new Error("Book already registered.");
     }
     const { rows } = await db.query(
-      `INSERT INTO books (user_id, api_id, title, author, notes, cover_image, isbn) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO books (user_id, api_id, title, author, notes, cover_image, isbn, description, publisher, publish_date) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        RETURNING *`,
-      [userId, apiId, title, author, notes, cover_image, isbn]
+      [userId, apiId, title, author, notes, cover_image, isbn, description, publisher, publish_date]
     );
     return rows[0];
   }
@@ -56,21 +56,28 @@ export default class Book {
 
   // Actualiza campos del libro; se evita actualizar el apiId
   static async update(id, userId, data) {
-    const keys = Object.keys(data).filter((key) => key !== "apiId" && key != "id");
+    // Filtra los campos válidos para actualizar
+    const keys = Object.keys(data).filter((key) => 
+      key !== "apiId" && key !== "id" &&
+      ["title", "author", "notes", "cover_image", "isbn", "description", "publisher", "publish_date"].includes(key)
+    );
+  
     if (!keys.length) throw new Error("No hay campos válidos para actualizar");
-
+  
     const fields = keys.map((key, index) => `${key} = $${index + 1}`);
     const values = keys.map((key) => data[key]);
-    // Agregamos el id y userId al final
+  
+    // Agregamos el id y userId al final de los valores
     values.push(id, userId);
-
+  
     const query = `
       UPDATE books
       SET ${fields.join(", ")}
       WHERE id = $${values.length - 1} AND user_id = $${values.length}
       RETURNING *
     `;
+    
     const { rows } = await db.query(query, values);
     return rows[0];
   }
-}
+}  

@@ -21,7 +21,10 @@ router.post(
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("author").notEmpty().withMessage("El autor es obligatorio"),
     check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check('isbn').optional().isString().withMessage('El ISBN debe ser un texto')
+    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
+    check("description").optional().isString().withMessage("La descripción debe ser texto"),
+    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
+    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida")
   ],
   createBook
 );
@@ -38,7 +41,10 @@ router.patch(
     check("title").optional().isString().withMessage("El título debe ser texto"),
     check("author").optional().isString().withMessage("El autor debe ser texto"),
     check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check('isbn').optional().isString().withMessage('El ISBN debe ser un texto')
+    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
+    check("description").optional().isString().withMessage("La descripción debe ser texto"),
+    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
+    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida")
   ],
   updateBook
 );
@@ -76,12 +82,22 @@ export default router;
  *                 type: string
  *                 description: Notas sobre el libro (opcional).
  *               isbn:
-                   type: string
-                   description: ISBN del libro (opcional).
+ *                 type: string
+ *                 description: ISBN del libro (opcional).
  *               cover_image:
  *                 type: string
  *                 format: binary
  *                 description: Imagen de portada del libro (opcional).
+ *               description:
+ *                 type: string
+ *                 description: Descripción del libro (opcional).
+ *               publisher:
+ *                 type: string
+ *                 description: Nombre del editor (opcional).
+ *               publish_date:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de publicación del libro (opcional).
  *     responses:
  *       201:
  *         description: Libro creado exitosamente.
@@ -149,12 +165,22 @@ export default router;
  *                 type: string
  *                 description: Nuevas notas sobre el libro (opcional).
  *               isbn:
-                   type: string
-                   description: ISBN del libro (opcional). 
+ *                 type: string
+ *                 description: ISBN del libro (opcional). 
  *               cover_image:
  *                 type: string
  *                 format: binary
  *                 description: Nueva imagen de portada del libro (opcional).
+ *               description:
+ *                 type: string
+ *                 description: Descripción del libro (opcional).
+ *               publisher:
+ *                 type: string
+ *                 description: Nombre del editor (opcional).
+ *               publish_date:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de publicación del libro (opcional).
  *     responses:
  *       200:
  *         description: Libro actualizado exitosamente.

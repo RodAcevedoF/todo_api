@@ -12,11 +12,14 @@ export const createBook = async (req, res) => {
     );
   }
   try {
-    const { cover_image, isbn, ...bookData } = req.body;
+    const { cover_image, isbn, description, publisher, publish_date, ...bookData } = req.body;
     const book = await Book.create(req.user.id, {
       ...bookData,
       cover_image: cover_image || null,
-      isbn: isbn || null 
+      isbn: isbn || null,
+      description: description || null,
+      publisher: publisher || null,
+      publish_date: publish_date || null,
     });
     return successResponse(res, book, 201);
   } catch (error) {
@@ -55,13 +58,17 @@ export const updateBook = async (req, res) => {
     );
   }
   try {
-    const bookData = { ...req.body };
-    if (req.file) {
-      bookData.cover_image = req.file.filename;
-    }
+    const { description, publisher, publish_date, ...bookData } = req.body;
+
+    // Añade los nuevos campos al objeto `bookData`
+    if (description) bookData.description = description;
+    if (publisher) bookData.publisher = publisher;
+    if (publish_date) bookData.publish_date = publish_date;
+
     if (Object.keys(bookData).length === 0) {
       return errorResponse(res, "No valid input", 400);
     }
+
     const book = await Book.update(req.params.id, req.user.id, bookData);
     if (!book) return errorResponse(res, "Book not found", 404);
     return successResponse(res, book);
