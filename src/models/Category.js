@@ -10,6 +10,10 @@ export default class Category {
 
   // Asegurarse de que las categorías existan (crear si no existen)
   static async ensureCategoriesExist(names) {
+    if (!Array.isArray(names)) {
+      throw new Error("El parámetro 'names' debe ser un arreglo.");
+    }
+  
     const categories = await Promise.all(
       names.map(async (name) => {
         const query = `INSERT INTO categories (name)
@@ -20,8 +24,10 @@ export default class Category {
         return rows[0];
       })
     );
+  
     return categories.map((category) => category.id);
   }
+  
 
   // Obtener todas las categorías
   static async findAll() {
