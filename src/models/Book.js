@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import Category from "./Category.js";
 
 export default class Book {
   // Verifica si el libro ya existe para un usuario dado
