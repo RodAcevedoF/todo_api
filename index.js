@@ -5,6 +5,7 @@ import db from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
 import todoRoutes from "./src/routes/todo.routes.js";
 import bookRoutes from "./src/routes/book.routes.js";
+import categoryRoutes from "./src/routes/category.routes.js"
 import videoRoutes from "./src/routes/video.routes.js";
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
@@ -72,6 +73,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/videos", videoRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Health Check
 app.get("/health", (req, res) => {
