@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
-import { createBook, getBooks, deleteBook, updateBook } from "../controllers/book.controller.js";
+import {
+  createBook,
+  getBooks,
+  deleteBook,
+  updateBook
+} from "../controllers/book.controller.js";
 import upload from "../config/upload.js";
 
 const router = Router();
@@ -14,80 +19,84 @@ const excludeApiId = (req, res, next) => {
 
 router.use(authenticate);
 
-/* router.post(
-  "/",
-  upload.single("cover_image"),
-  [
-    check("title").notEmpty().withMessage("El título es obligatorio"),
-    check("author").notEmpty().withMessage("El autor es obligatorio"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
-    check("description").optional().isString().withMessage("La descripción debe ser texto"),
-    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
-    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida")
-  ],
-  createBook
-); */
 router.post(
   "/",
   upload.single("cover_image"),
   [
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("author").notEmpty().withMessage("El autor es obligatorio"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
-    check("description").optional().isString().withMessage("La descripción debe ser texto"),
-    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
-    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida"),
+    check("notes")
+      .optional()
+      .isString()
+      .withMessage("Las notas deben ser texto"),
+    check("isbn")
+      .optional()
+      .isString()
+      .withMessage("El ISBN debe ser un texto"),
+    check("description")
+      .optional()
+      .isString()
+      .withMessage("La descripción debe ser texto"),
+    check("publisher")
+      .optional()
+      .isString()
+      .withMessage("El editor debe ser texto"),
+    check("publish_date")
+      .optional()
+      .isISO8601()
+      .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
       .optional()
       .isInt({ min: 1 })
-      .withMessage("El número de páginas debe ser un entero positivo"),
+      .withMessage("El número de páginas debe ser un entero positivo")
   ],
   createBook
 );
 
-
 router.get("/", getBooks);
 
 router.delete("/:id", deleteBook);
-
-/* router.patch(
-  "/:id",
-  upload.single("cover_image"),
-  excludeApiId,
-  [
-    check("title").optional().isString().withMessage("El título debe ser texto"),
-    check("author").optional().isString().withMessage("El autor debe ser texto"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
-    check("description").optional().isString().withMessage("La descripción debe ser texto"),
-    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
-    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida")
-  ],
-  updateBook
-); */
 
 router.patch(
   "/:id",
   upload.single("cover_image"),
   excludeApiId,
   [
-    check("title").optional().isString().withMessage("El título debe ser texto"),
-    check("author").optional().isString().withMessage("El autor debe ser texto"),
-    check("notes").optional().isString().withMessage("Las notas deben ser texto"),
-    check("isbn").optional().isString().withMessage("El ISBN debe ser un texto"),
-    check("description").optional().isString().withMessage("La descripción debe ser texto"),
-    check("publisher").optional().isString().withMessage("El editor debe ser texto"),
-    check("publish_date").optional().isISO8601().withMessage("La fecha de publicación debe ser válida"),
+    check("title")
+      .optional()
+      .isString()
+      .withMessage("El título debe ser texto"),
+    check("author")
+      .optional()
+      .isString()
+      .withMessage("El autor debe ser texto"),
+    check("notes")
+      .optional()
+      .isString()
+      .withMessage("Las notas deben ser texto"),
+    check("isbn")
+      .optional()
+      .isString()
+      .withMessage("El ISBN debe ser un texto"),
+    check("description")
+      .optional()
+      .isString()
+      .withMessage("La descripción debe ser texto"),
+    check("publisher")
+      .optional()
+      .isString()
+      .withMessage("El editor debe ser texto"),
+    check("publish_date")
+      .optional()
+      .isISO8601()
+      .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
       .optional()
       .isInt({ min: 1 })
-      .withMessage("El número de páginas debe ser un entero positivo"),
+      .withMessage("El número de páginas debe ser un entero positivo")
   ],
   updateBook
 );
-
 
 export default router;
 
@@ -206,7 +215,7 @@ export default router;
  *                 description: Nuevas notas sobre el libro (opcional).
  *               isbn:
  *                 type: string
- *                 description: ISBN del libro (opcional). 
+ *                 description: ISBN del libro (opcional).
  *               cover_image:
  *                 type: string
  *                 format: binary
