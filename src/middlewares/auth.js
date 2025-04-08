@@ -1,4 +1,4 @@
-/* import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 import User from "../models/User.js";
 import { errorResponse } from "../utils/apiResponse.js";
@@ -43,10 +43,6 @@ export const authenticate = async (req, res, next) => {
     errorResponse(res, "Authentication failed", 401);
   }
 };
- */
-import jwt from "jsonwebtoken";
-import db from "../config/db.js";
-import { errorResponse } from "../utils/apiResponse.js";
 
 export const validateRefreshToken = async (req, res, next) => {
   try {
