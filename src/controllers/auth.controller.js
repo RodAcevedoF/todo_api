@@ -100,10 +100,12 @@ export const register = async (req, res) => {
     errorResponse(res, error.message);
   }
 }; */
-
 export const login = async (req, res) => {
+  console.log("Login request received:", req.body); // Log inicial
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error("Validation errors:", errors.array());
     return errorResponse(
       res,
       errors.array().map((err) => err.msg),
@@ -113,25 +115,33 @@ export const login = async (req, res) => {
 
   try {
     const { email, password } = req.body;
+    console.log("Sanitized email:", email);
+
     const sanitizedEmail = email.trim().toLowerCase();
     const user = await User.findByEmail(sanitizedEmail);
+    console.log("User found:", user);
 
     if (!user || !(await User.comparePassword(password, user.password))) {
+      console.error("Invalid email or password.");
       return errorResponse(res, "Invalid email or password.", 401);
     }
 
-    const accessToken = User.generateToken(user); // Access token (corto plazo)
+    const accessToken = User.generateToken(user); // Token de acceso
+    console.log("Access token generated:", accessToken);
+
     const refreshToken = jwt.sign(
       { id: user.id },
-      process.env.JWT_REFRESH_SECRET, // Usa el secreto del refresh token
+      process.env.JWT_REFRESH_SECRET, // Secreto del refresh token
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" }
     );
+    console.log("Refresh token generated:", refreshToken);
 
-    // Guardar refresh token asociado al usuario
+    // Guardar el refresh token en la base de datos
     await db.query(
       "INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)",
       [refreshToken, user.id]
     );
+    console.log("Refresh token saved to database.");
 
     return successResponse(res, {
       user: { id: user.id, name: user.name, email: user.email },
@@ -143,6 +153,7 @@ export const login = async (req, res) => {
     return errorResponse(res, "Failed to log in. Please try again.", 500);
   }
 };
+
 /* 
 export const logout = async (req, res) => {
   try {
