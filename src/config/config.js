@@ -13,7 +13,7 @@ const config = {
   },
   jwt: {
     secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES || "15m", // Access token con expiración corta
+    expiresIn: process.env.JWT_EXPIRES || "1h", // Access token con expiración corta
     refreshSecret: process.env.JWT_REFRESH_SECRET, // Secreto para refresh tokens
     refreshExpiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" // Expiración de refresh tokens
   },
