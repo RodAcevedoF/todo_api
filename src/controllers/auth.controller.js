@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import User from "../models/User.js";
 import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
+import jwt from "jsonwebtoken";
 
 /* export const register = async (req, res) => {
   const errors = validationResult(req);
