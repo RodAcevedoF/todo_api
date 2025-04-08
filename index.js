@@ -117,7 +117,8 @@ import {
 } from "./src/middlewares/rateLimit.js"; // Rate limiting
 
 const app = express();
-app.set("trust proxy", true); // Para manejar proxys correctamente
+//app.set("trust proxy", true); // Para manejar proxys correctamente
+app.set("trust proxy", "loopback"); // Solo confía en proxies locales (127.0.0.1)
 
 // CORS con orígenes permitidos
 const allowedOrigins = [
