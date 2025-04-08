@@ -25,6 +25,10 @@ router.post(
     check("videoId").notEmpty().withMessage("El ID del video es obligatorio"),
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("channel").notEmpty().withMessage("El canal es obligatorio"),
+    check("channelId")
+      .optional()
+      .isString()
+      .withMessage("El ID del canal debe ser texto"),
     check("notes")
       .optional()
       .isString()
@@ -58,6 +62,10 @@ router.patch(
       .optional()
       .isString()
       .withMessage("El canal debe ser texto"),
+    check("channelId")
+      .optional()
+      .isString()
+      .withMessage("El ID del canal debe ser texto"),
     check("notes")
       .optional()
       .isString()

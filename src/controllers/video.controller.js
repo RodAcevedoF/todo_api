@@ -12,12 +12,15 @@ export const createVideo = async (req, res) => {
     );
   }
   try {
-    const { thumbnail, description, created_at, ...videoData } = req.body;
+    // Extraemos thumbnail, description, created_at, channelId y el resto de los datos
+    const { thumbnail, description, created_at, channelId, ...videoData } =
+      req.body;
     const video = await Video.create(req.user.id, {
       ...videoData,
       description: description || null,
       created_at: created_at ? new Date(created_at) : new Date(),
-      thumbnail: req.file ? req.file.filename : thumbnail || null
+      thumbnail: req.file ? req.file.filename : thumbnail || null,
+      channelId: channelId || null // Se integra el nuevo campo channelId
     });
     return successResponse(res, video, 201);
   } catch (error) {
@@ -62,8 +65,11 @@ export const updateVideo = async (req, res) => {
     if (req.file) {
       videoData.thumbnail = req.file.filename;
     }
-    // Evitar actualizar el videoId
-    if (videoData.videoId) delete videoData.videoId;
+    // Evitar actualizar el videoId, ya que es un identificador inmutable.
+    //if (videoData.videoId) delete videoData.videoId;
+    // Opcional: Si no deseas que se actualice el channelId, puedes descomentar la siguiente línea.
+    // if (videoData.channelId) delete videoData.channelId;
+
     if (videoData.created_at) {
       videoData.created_at = new Date(videoData.created_at);
     }

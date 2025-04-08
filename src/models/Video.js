@@ -19,15 +19,16 @@ export default class Video {
       notes,
       thumbnail = null,
       description = null,
-      created_at
+      created_at,
+      channelId = null // Nuevo campo añadido con valor predeterminado
     }
   ) {
     if (await this.exists(userId, videoId)) {
       throw new Error("El video ya está guardado.");
     }
     const { rows } = await db.query(
-      `INSERT INTO videos (user_id, video_id, title, channel, notes, thumbnail, description, created_at) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      `INSERT INTO videos (user_id, video_id, title, channel, notes, thumbnail, description, created_at, channelId) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
        RETURNING *`,
       [
         userId,
@@ -37,7 +38,8 @@ export default class Video {
         notes,
         thumbnail,
         description,
-        created_at
+        created_at,
+        channelId
       ]
     );
     return rows[0];
@@ -74,6 +76,7 @@ export default class Video {
   }
 
   // Actualiza campos del video; se evita actualizar el videoId
+  // Si deseas impedir actualizar también channelId, puedes filtrarlo en el array de keys.
   static async update(id, userId, data) {
     const keys = Object.keys(data).filter((key) => key !== "videoId");
     if (!keys.length) throw new Error("No hay campos válidos para actualizar");
