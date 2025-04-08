@@ -276,3 +276,41 @@ export const updateProfile = async (req, res) => {
     return errorResponse(res, "Failed to update profile.", 500);
   }
 };
+
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Refresh token is missing" });
+    }
+
+    // Verificar si el refresh token existe en la base de datos
+    const { rows } = await db.query(
+      "SELECT * FROM refresh_tokens WHERE token = $1",
+      [refreshToken]
+    );
+    if (rows.length === 0) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Invalid refresh token" });
+    }
+
+    // Decodificar el refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Generar un nuevo access token
+    const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, {
+      expiresIn: "15m"
+    });
+
+    return res.status(200).json({ success: true, accessToken });
+  } catch (error) {
+    console.error("Error during token refresh:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to refresh access token" });
+  }
+};
