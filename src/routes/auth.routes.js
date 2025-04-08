@@ -1,42 +1,142 @@
-import { Router } from "express";
+/* import { Router } from "express";
 import { check } from "express-validator";
-import { register, login, logout, updateProfile } from "../controllers/auth.controller.js";
+import {
+  register,
+  login,
+  logout,
+  updateProfile
+} from "../controllers/auth.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import {
   loginRateLimiter,
   registerRateLimiter
 } from "../middlewares/rateLimit.js";
+import { handleValidationErrors } from "../middlewares/validation.js";
 
 const router = Router();
+
+const validateRegister = [
+  check("name").notEmpty().withMessage("Name is required"),
+  check("email").isEmail().withMessage("Invalid email format"),
+  check("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
+];
+
+const validateLogin = [
+  check("email").isEmail().withMessage("Invalid email format"),
+  check("password").notEmpty().withMessage("Password is required")
+];
+
+const validateProfileUpdate = [
+  check("name").optional().notEmpty().withMessage("Name cannot be empty"),
+  check("email").optional().isEmail().withMessage("Invalid email format"),
+  check("phone")
+    .optional()
+    .matches(/^\+\d{1,3}\s?\d{4,14}$/)
+    .withMessage("Invalid phone number format")
+];
 
 router.post(
   "/register",
   registerRateLimiter,
-  [
-    check("name").notEmpty().withMessage("Name is required"),
-    check("email").isEmail().withMessage("Invalid email format"),
-    check("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long")
-  ],
+  validateRegister,
+  handleValidationErrors,
   register
 );
 
 router.post(
   "/login",
   loginRateLimiter,
-  [
-    check("email").isEmail().withMessage("Invalid email format"),
-    check("password").notEmpty().withMessage("Password is required")
-  ],
+  validateLogin,
+  handleValidationErrors,
   login
 );
 
 router.post("/logout", authenticate, logout);
 
-router.put("/profile", authenticate, updateProfile);
+router.put(
+  "/profile",
+  authenticate,
+  validateProfileUpdate,
+  handleValidationErrors,
+  updateProfile
+);
 
 export default router;
+ */
+import { Router } from "express";
+import { check } from "express-validator";
+import {
+  register,
+  login,
+  logout,
+  updateProfile,
+  refreshAccessToken
+} from "../controllers/auth.controller.js";
+import { authenticate } from "../middlewares/auth.js";
+import { validateRefreshToken } from "../middlewares/auth.js"; // Middleware para refresh tokens
+import {
+  loginRateLimiter,
+  registerRateLimiter
+} from "../middlewares/rateLimit.js";
+import { handleValidationErrors } from "../middlewares/validation.js";
+
+const router = Router();
+
+const validateRegister = [
+  check("name").notEmpty().withMessage("Name is required"),
+  check("email").isEmail().withMessage("Invalid email format"),
+  check("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
+];
+
+const validateLogin = [
+  check("email").isEmail().withMessage("Invalid email format"),
+  check("password").notEmpty().withMessage("Password is required")
+];
+
+const validateProfileUpdate = [
+  check("name").optional().notEmpty().withMessage("Name cannot be empty"),
+  check("email").optional().isEmail().withMessage("Invalid email format"),
+  check("phone")
+    .optional()
+    .matches(/^\+\d{1,3}\s?\d{4,14}$/)
+    .withMessage("Invalid phone number format")
+];
+
+router.post(
+  "/register",
+  registerRateLimiter,
+  validateRegister,
+  handleValidationErrors,
+  register
+);
+
+router.post(
+  "/login",
+  loginRateLimiter,
+  validateLogin,
+  handleValidationErrors,
+  login
+);
+
+router.post("/logout", authenticate, logout);
+
+// Ruta para renovar el access token usando el refresh token
+router.post("/refresh", validateRefreshToken, refreshAccessToken);
+
+router.put(
+  "/profile",
+  authenticate,
+  validateProfileUpdate,
+  handleValidationErrors,
+  updateProfile
+);
+
+export default router;
+
 /**
  * @swagger
  * tags:
@@ -134,5 +234,3 @@ export default router;
  *       401:
  *         description: No autorizado.
  */
-
-

@@ -3,6 +3,14 @@ import Video from "../models/Video.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const createVideo = async (req, res) => {
+  if (
+    (!req.body.channelId || req.body.channelId === "") &&
+    req.body.channelid
+  ) {
+    req.body.channelId = req.body.channelid;
+  }
+
+  console.log("Datos recibidos en createVideo:", req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
@@ -11,16 +19,14 @@ export const createVideo = async (req, res) => {
       400
     );
   }
+
   try {
-    // Extraemos thumbnail, description, created_at, channelId y el resto de los datos
-    const { thumbnail, description, created_at, channelId, ...videoData } =
-      req.body;
+    const { thumbnail, description, created_at, ...videoData } = req.body;
     const video = await Video.create(req.user.id, {
       ...videoData,
       description: description || null,
       created_at: created_at ? new Date(created_at) : new Date(),
-      thumbnail: req.file ? req.file.filename : thumbnail || null,
-      channelId: channelId || null // Se integra el nuevo campo channelId
+      thumbnail: req.file ? req.file.filename : thumbnail || null
     });
     return successResponse(res, video, 201);
   } catch (error) {

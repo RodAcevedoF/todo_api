@@ -10,14 +10,19 @@ export default class User {
     profile_image = null,
     phone = null
   }) {
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const { rows } = await db.query(
-      `INSERT INTO users (name, email, password, description, profile_image, phone) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
-       RETURNING *`,
-      [name, email, hashedPassword, description, profile_image, phone]
-    );
-    return rows[0];
+    try {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const { rows } = await db.query(
+        `INSERT INTO users (name, email, password, description, profile_image, phone) 
+         VALUES ($1, $2, $3, $4, $5, $6) 
+         RETURNING *`,
+        [name, email, hashedPassword, description, profile_image, phone]
+      );
+      return rows[0];
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw new Error("Failed to create user.");
+    }
   }
 
   static async findByEmail(email) {
@@ -56,6 +61,17 @@ export default class User {
        WHERE id = $1 
        RETURNING id, name, email, description, profile_image, phone`,
       values
+    );
+    return rows[0];
+  }
+
+  static async updateProfileImage(id, profileImagePath) {
+    const { rows } = await db.query(
+      `UPDATE users 
+       SET profile_image = $1 
+       WHERE id = $2 
+       RETURNING id, name, email, description, profile_image, phone`,
+      [profileImagePath, id]
     );
     return rows[0];
   }
