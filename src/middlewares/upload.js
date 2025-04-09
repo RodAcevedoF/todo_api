@@ -18,11 +18,10 @@ export const uploadMiddleware = (req, res, next) => {
       return res.status(400).json({ error: req.fileValidationError });
     }
 
+    // Si no se subió un archivo, no lanzamos error y continuamos
     if (!req.file) {
-      // Si no se cargó archivo (pero no hubo error)
-      return res
-        .status(400)
-        .json({ error: "No file uploaded or invalid file type" });
+      // Si no hay archivo, simplemente asignamos un valor nulo a req.file
+      req.file = null;
     }
 
     next(); // Todo correcto, continuar con el flujo

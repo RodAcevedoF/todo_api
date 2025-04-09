@@ -17,9 +17,10 @@ export const createTodo = async (req, res) => {
       error: errors.array().map((err) => err.msg)
     });
   }
+
   try {
     const { title, description, deadline, priority } = req.body;
-    const fileUrl = req.file ? req.file.path : null;
+    const fileUrl = req.file ? req.file.path : null; // Si no hay archivo, fileUrl será null
 
     const newTodo = await Todo.create(req.user.id, {
       title,
@@ -40,7 +41,6 @@ export const createTodo = async (req, res) => {
     });
   }
 };
-
 export const updateTodo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -52,7 +52,7 @@ export const updateTodo = async (req, res) => {
 
   try {
     const updates = req.body;
-    if (req.file) updates.fileUrl = req.file.path;
+    if (req.file) updates.fileUrl = req.file.path; // Si hay archivo, lo asignamos a fileUrl
 
     const updatedTodo = await Todo.update(req.params.id, req.user.id, updates);
 
