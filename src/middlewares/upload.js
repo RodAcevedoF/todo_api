@@ -1,4 +1,5 @@
 import upload from "../config/upload.js";
+import multer from "multer";
 
 export const uploadMiddleware = (req, res, next) => {
   const uploader = upload.single("file");
