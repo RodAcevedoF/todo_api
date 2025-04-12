@@ -22,7 +22,7 @@ router.post(
   "/",
   upload.single("thumbnail"),
   [
-    check("videoId").notEmpty().withMessage("El ID del video es obligatorio"),
+    check("video_id").notEmpty().withMessage("El ID del video es obligatorio"),
     check("title").notEmpty().withMessage("El título es obligatorio"),
     check("channel").notEmpty().withMessage("El canal es obligatorio"),
     check("channelId")
