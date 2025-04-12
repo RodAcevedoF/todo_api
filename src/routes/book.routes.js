@@ -47,13 +47,8 @@ router.post(
       .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
       .optional({ nullable: true })
-      .custom(
-        (value) => value === 0 || (typeof value === "number" && value >= 1)
-      )
-      .withMessage(
-        "El número de páginas debe ser un entero positivo o 0 si no se tiene información."
-      )
-      .bail()
+      .isInt({ min: 0 })
+      .withMessage("El número de páginas debe ser 0 o un entero positivo.")
   ],
   createBook
 );
@@ -97,13 +92,8 @@ router.patch(
       .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
       .optional({ nullable: true })
-      .custom(
-        (value) => value === 0 || (typeof value === "number" && value >= 1)
-      )
-      .withMessage(
-        "El número de páginas debe ser un entero positivo o 0 si no se tiene información."
-      )
-      .bail()
+      .isInt({ min: 0 })
+      .withMessage("El número de páginas debe ser 0 o un entero positivo.")
   ],
   updateBook
 );

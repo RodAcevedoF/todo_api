@@ -40,7 +40,7 @@ export const createBook = async (req, res) => {
 
     const book = await Book.create(req.user.id, {
       ...bookData,
-      pages: pages || null, // Incluimos el número de páginas
+      pages: typeof pages === "number" ? pages : null, // Incluimos el número de páginas
       cover_image: cover_image || null,
       isbn: isbn || null,
       description: description || null,
@@ -48,6 +48,7 @@ export const createBook = async (req, res) => {
       publish_date: publish_date || null,
       categories: parsedCategories // Enviamos las categorías procesadas
     });
+    console.log(bookData);
 
     return successResponse(res, book, 201);
   } catch (error) {
