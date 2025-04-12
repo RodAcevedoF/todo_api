@@ -46,9 +46,10 @@ router.post(
       .isISO8601()
       .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
-      .optional()
+      .optional({ nullable: true })
       .isInt({ min: 1 })
       .withMessage("El número de páginas debe ser un entero positivo")
+      .bail()
   ],
   createBook
 );
@@ -91,9 +92,10 @@ router.patch(
       .isISO8601()
       .withMessage("La fecha de publicación debe ser válida"),
     check("pages")
-      .optional()
+      .optional({ nullable: true })
       .isInt({ min: 1 })
       .withMessage("El número de páginas debe ser un entero positivo")
+      .bail()
   ],
   updateBook
 );
