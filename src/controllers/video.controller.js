@@ -3,6 +3,11 @@ import Video from "../models/Video.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const createVideo = async (req, res) => {
+  // Verifica que `video_id` esté presente
+  if (!req.body.video_id || req.body.video_id.trim() === "") {
+    return errorResponse(res, "El campo video_id es obligatorio.", 400);
+  }
+
   if (
     (!req.body.channelId || req.body.channelId === "") &&
     req.body.channelid
@@ -11,6 +16,7 @@ export const createVideo = async (req, res) => {
   }
 
   console.log("Datos recibidos en createVideo:", req.body);
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
@@ -22,15 +28,26 @@ export const createVideo = async (req, res) => {
 
   try {
     const { thumbnail, description, created_at, ...videoData } = req.body;
-    const video = await Video.create(req.user.id, {
+
+    console.log("Datos enviados al modelo:", {
+      video_id: req.body.video_id,
       ...videoData,
       description: description || null,
       created_at: created_at ? new Date(created_at) : new Date(),
       thumbnail: req.file ? req.file.filename : thumbnail || null
     });
+
+    const video = await Video.create(req.user.id, {
+      video_id: req.body.video_id,
+      ...videoData,
+      description: description || null,
+      created_at: created_at ? new Date(created_at) : new Date(),
+      thumbnail: req.file ? req.file.filename : thumbnail || null
+    });
+
     return successResponse(res, video, 201);
   } catch (error) {
-    console.error("Error creating video:", error);
+    console.error("Error creando el video:", error);
     return errorResponse(res, error.message);
   }
 };

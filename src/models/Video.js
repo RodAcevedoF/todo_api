@@ -1,10 +1,10 @@
 import db from "../config/db.js";
 export default class Video {
   // Verifica si el video ya existe para un usuario dado
-  static async exists(userId, videoId) {
+  static async exists(userId, video_id) {
     const { rows } = await db.query(
       "SELECT id FROM videos WHERE user_id = $1 AND video_id = $2",
-      [userId, videoId]
+      [userId, video_id]
     );
     return rows.length > 0;
   }
@@ -13,7 +13,7 @@ export default class Video {
   static async create(
     userId,
     {
-      videoId,
+      video_id,
       title,
       channel,
       notes,
@@ -23,7 +23,7 @@ export default class Video {
       channelId = null // Nuevo campo añadido con valor predeterminado
     }
   ) {
-    if (await this.exists(userId, videoId)) {
+    if (await this.exists(userId, video_id)) {
       throw new Error("El video ya está guardado.");
     }
     const { rows } = await db.query(
@@ -32,7 +32,7 @@ export default class Video {
        RETURNING *`,
       [
         userId,
-        videoId,
+        video_id,
         title,
         channel,
         notes,
