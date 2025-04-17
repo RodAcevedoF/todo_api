@@ -1,161 +1,155 @@
+# 📦 Todo API
 
-# 📚🎬📝 To-Do API - Libros, Videos y Tareas con Autenticación JWT
-
-Bienvenido a la **To-Do API**, un backend completo construido con **Node.js**, **Express** y **PostgreSQL**, que permite a los usuarios:
-
-- ✅ Gestionar tareas  
-- 📘 Guardar y comentar libros  
-- 📺 Organizar videos por categorías  
-- 🔐 Registrarse e iniciar sesión con JWT  
-- 📎 Subir archivos con Multer
+A complete RESTful API built with **Express** and **PostgreSQL**, allowing users to authenticate and manage tasks, books, and videos. Includes JWT authentication with refresh tokens, file uploads (Multer), Swagger documentation, and is Docker-ready.
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## 🚀 Main Features
 
-- 🟩 Node.js  
-- ⚡ Express.js  
-- 🐘 PostgreSQL  
-- 🔐 JWT (Json Web Token)  
-- 🔒 Bcrypt.js  
-- 📦 Multer (para carga de archivos)  
-- 🌐 CORS, Dotenv, Body-parser
-
----
-
-## 📂 Estructura de la API
-
-### 🔐 Autenticación
-
-| Método | Endpoint             | Descripción                |
-|--------|----------------------|----------------------------|
-| POST   | `/api/auth/register` | Registro de usuario        |
-| POST   | `/api/auth/login`    | Login con respuesta JWT    |
-
-### 📝 Tareas (To-Dos)
-
-| Método | Endpoint           | Descripción             |
-|--------|--------------------|-------------------------|
-| GET    | `/api/todos`       | Obtener todas las tareas |
-| POST   | `/api/todos`       | Crear nueva tarea        |
-| PUT    | `/api/todos/:id`   | Editar tarea             |
-| DELETE | `/api/todos/:id`   | Eliminar tarea           |
-
-### 📚 Libros
-
-| Método | Endpoint            | Descripción               |
-|--------|---------------------|---------------------------|
-| GET    | `/api/books`        | Obtener libros            |
-| POST   | `/api/books`        | Crear libro (con archivo) |
-| PUT    | `/api/books/:id`    | Editar libro              |
-| DELETE | `/api/books/:id`    | Eliminar libro            |
-
-### 🎬 Videos
-
-| Método | Endpoint             | Descripción     |
-|--------|----------------------|-----------------|
-| GET    | `/api/videos`        | Obtener videos  |
-| POST   | `/api/videos`        | Crear video     |
-| PUT    | `/api/videos/:id`    | Editar video    |
-| DELETE | `/api/videos/:id`    | Eliminar video  |
+- ✅ JWT + Refresh Token authentication
+- 📋 CRUD for To-Dos
+- 📚 CRUD for Books
+- 🎥 CRUD for Videos
+- 📂 File uploads using **Multer**
+- 🛡️ HTTP security with **Helmet**
+- 🧱 Environment variable validation
+- 📈 Swagger documentation at `/api-docs`
+- 🐳 Docker support for production
+- 🖥️ Deployed on VPS with PostgreSQL
+- 🔄 Custom logger and error handler
+- 🔐 Rate limiting on sensitive routes
+- 🔧 Compression, CORS, logging
 
 ---
 
-## 🔐 Autenticación con JWT
-
-Una vez que un usuario se **registra o inicia sesión**, recibe un **token JWT** que debe incluir en cada solicitud protegida:
+## 📁 Project Structure
 
 ```
-Authorization: Bearer TU_TOKEN_AQUÍ
+todo_api/
+│
+├── src/
+│   ├── config/          # DB, environment, logger, swagger configs
+│   ├── controllers/     # Entity logic
+│   ├── middlewares/     # Auth, error handler, rate limiting, etc.
+│   ├── models/          # Data schemas (no ORM)
+│   ├── routes/          # API routes
+│   └── services/        # Business logic
+│
+├── uploads/             # Uploaded user files
+├── Dockerfile           # Docker build file
+├── .env                 # Environment variables
+├── README.md            # This file 📄
+└── main.js              # Entry point
 ```
 
 ---
 
-## 📎 Subida de Archivos
+## 🔑 Authentication
 
-Puedes subir archivos (por ejemplo, portadas de libros) usando el endpoint:
+All protected routes require `Authorization: Bearer <token>`.
 
-```
-POST /api/books
-Content-Type: multipart/form-data
-```
+- `POST /api/auth/register` – Register a new user
+- `POST /api/auth/login` – Login and receive token + refresh token
+- `POST /api/auth/refresh-token` – Get a new access token
+- `GET /api/auth/profile` – Get authenticated user profile
+- `POST /api/auth/logout` – Invalidate refresh token (coming)
 
 ---
 
-## ⚙️ Configuración
+## ✅ To-Do Routes
 
-1. Clona el repositorio:
+- `GET /api/todos` – Get all tasks
+- `POST /api/todos` – Create a task
+- `PUT /api/todos/:id` – Update a task
+- `DELETE /api/todos/:id` – Delete a task
+
+---
+
+## 📚 Book Routes
+
+- `GET /api/books` – List books
+- `POST /api/books` – Add a book
+- `PUT /api/books/:id` – Update a book
+- `DELETE /api/books/:id` – Delete a book
+
+---
+
+## 🎥 Video Routes
+
+- `GET /api/videos` – List saved videos
+- `POST /api/videos` – Save a new video
+- `DELETE /api/videos/:id` – Delete a video
+
+---
+
+## 🧠 Category Routes
+
+Basic categorization for todos/books/videos:
+
+- `GET /api/categories` – Get all categories
+- `POST /api/categories` – Create a new category
+
+---
+
+## 🧪 Utility Routes
+
+- `GET /ping` – Returns `{ message: "Server is running!" }`
+- `GET /health` – Returns server status and uptime
+- `GET /api-docs` – Access Swagger documentation
+
+---
+
+## 🔒 Security
+
+- **CORS:** Restricted to specific domains
+- **Helmet:** Secures HTTP headers
+- **Rate Limit:** On login and register
+- **Multer:** Validates and stores uploads in `/uploads`
+
+---
+
+## 🐳 Docker
 
 ```bash
-git clone https://github.com/tu_usuario/to-do-api.git
-cd to-do-api
-```
+# Build the image
+docker build -t todo_api .
 
-2. Instala las dependencias:
-
-```bash
-npm install
-```
-
-3. Crea el archivo `.env`:
-
-```env
-PORT=5000
-DATABASE_URL=postgres://usuario:contraseña@localhost:5432/tu_db
-JWT_SECRET=tu_clave_secreta
-UPLOAD_DIR=uploads/
-```
-
-4. Inicia el servidor:
-
-```bash
-npm start
+# Run the container
+docker run -d -p 3000:3000 --env-file .env todo_api
 ```
 
 ---
 
-## 🧪 Ejemplo de Solicitud de Login
+## 🛠️ Tech Stack
 
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "username": "rodrigo",
-  "password": "123456"
-}
-```
-
-🔁 Respuesta:
-
-```json
-{
-  "token": "jwt_token_aquí"
-}
-```
+- **Express**
+- **PostgreSQL**
+- **JWT + Refresh Tokens**
+- **Multer**
+- **Swagger**
+- **Docker**
+- **Helmet**
+- **Nodemon** (dev)
+- **dotenv**
+- **cors**
+- **compression**
+- **winston** (logger)
 
 ---
 
-## 🛠 Próximas Mejoras
+## 🧭 Roadmap
 
-- 🔄 Refresh tokens  
-- 🗃️ Paginación de resultados  
-- 🔍 Búsqueda y filtrado avanzado  
-- 📱 Documentación Swagger  
-
----
-
-## 🤝 Contribuciones
-
-¿Ideas o mejoras? ¡Haz un fork y crea un pull request!  
-También puedes abrir un issue si encuentras algún bug 🐞.
+- [x] Full CRUD for to-dos, books, videos
+- [x] JWT + Refresh Token auth
+- [x] Swagger integration
+- [x] Docker and VPS setup
+- [ ] Add unit testing (Jest / Supertest)
+- [ ] Migrate to **Sequelize**
+- [ ] Migrate to **TypeScript**
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-MIT © Rodrigo
-
----
-
-> ¿Te gustó este proyecto? 🌟 ¡No olvides darle una estrella en GitHub!
+MIT License.  
+Crafted with ❤️ by [Rodrigo Acevedo](https://github.com/RodAcevedoF)
