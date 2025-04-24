@@ -23,32 +23,30 @@ router.post(
   "/",
   upload.single("cover_image"),
   [
-    check("title").notEmpty().withMessage("El título es obligatorio"),
-    check("author").notEmpty().withMessage("El autor es obligatorio"),
-    check("notes")
-      .optional()
-      .isString()
-      .withMessage("Las notas deben ser texto"),
-    check("isbn")
-      .optional()
-      .isString()
-      .withMessage("El ISBN debe ser un texto"),
+    check("title").notEmpty().withMessage("Title is required"),
+    check("author").notEmpty().withMessage("Author is required"),
+    check("notes").optional().isString().withMessage("Notes must be text"),
+    check("isbn").optional().isString().withMessage("ISBN must be text"),
     check("description")
       .optional()
       .isString()
-      .withMessage("La descripción debe ser texto"),
+      .withMessage("Description must be text"),
     check("publisher")
       .optional()
       .isString()
-      .withMessage("El editor debe ser texto"),
+      .withMessage("Publisher must be text"),
     check("publish_date")
       .optional()
       .isISO8601()
-      .withMessage("La fecha de publicación debe ser válida"),
+      .withMessage("Publish date must be valid"),
     check("pages")
       .optional({ nullable: true })
       .isInt({ min: 0 })
-      .withMessage("El número de páginas debe ser 0 o un entero positivo.")
+      .withMessage("Pages number must be 0 or a positive number."),
+    check("checked")
+      .optional()
+      .isBoolean()
+      .withMessage("Field 'checked' must be boolean")
   ],
   createBook
 );
@@ -62,58 +60,88 @@ router.patch(
   upload.single("cover_image"),
   excludeApiId,
   [
-    check("title")
-      .optional()
-      .isString()
-      .withMessage("El título debe ser texto"),
-    check("author")
-      .optional()
-      .isString()
-      .withMessage("El autor debe ser texto"),
-    check("notes")
-      .optional()
-      .isString()
-      .withMessage("Las notas deben ser texto"),
-    check("isbn")
-      .optional()
-      .isString()
-      .withMessage("El ISBN debe ser un texto"),
+    check("title").optional().isString().withMessage("Title must be text"),
+    check("author").optional().isString().withMessage("Author must be text"),
+    check("notes").optional().isString().withMessage("Notes must be text"),
+    check("isbn").optional().isString().withMessage("ISBN must be text"),
     check("description")
       .optional()
       .isString()
-      .withMessage("La descripción debe ser texto"),
+      .withMessage("Description must be text"),
     check("publisher")
       .optional()
       .isString()
-      .withMessage("El editor debe ser texto"),
+      .withMessage("Publisher must be text"),
     check("publish_date")
       .optional()
       .isISO8601()
-      .withMessage("La fecha de publicación debe ser válida"),
+      .withMessage("Publish date must be valid"),
     check("pages")
       .optional({ nullable: true })
       .isInt({ min: 0 })
-      .withMessage("El número de páginas debe ser 0 o un entero positivo.")
+      .withMessage("Pages number must be 0 or a positive number."),
+    check("checked")
+      .optional()
+      .isBoolean()
+      .withMessage("Field 'checked' must be boolean")
   ],
   updateBook
 );
 
 export default router;
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Book:
+ *       type: object
+ *       required:
+ *         - title
+ *         - author
+ *       properties:
+ *         title:
+ *           type: string
+ *           description: Title of the book
+ *         author:
+ *           type: string
+ *           description: Author of the book
+ *         notes:
+ *           type: string
+ *           description: Additional notes about the book
+ *         isbn:
+ *           type: string
+ *           description: ISBN of the book
+ *         description:
+ *           type: string
+ *           description: Description of the book
+ *         publisher:
+ *           type: string
+ *           description: Publisher of the book
+ *         publish_date:
+ *           type: string
+ *           format: date
+ *           description: The publish date of the book
+ *         pages:
+ *           type: integer
+ *           description: The number of pages in the book
+ *         checked:
+ *           type: boolean
+ *           description: Whether the book has been checked or not
+ */
 
 /**
  * @swagger
  * tags:
  *   name: Books
- *   description: Gestión de libros
- *
- * /api/books:
+ *   description: Operations related to books
+ */
+
+/**
+ * @swagger
+ * /books:
  *   post:
- *     summary: Crear un nuevo libro
+ *     summary: Create a new book
  *     tags: [Books]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
@@ -123,82 +151,94 @@ export default router;
  *             properties:
  *               title:
  *                 type: string
- *                 description: Título del libro.
+ *                 description: Title of the book
  *               author:
  *                 type: string
- *                 description: Autor del libro.
+ *                 description: Author of the book
  *               notes:
  *                 type: string
- *                 description: Notas sobre el libro (opcional).
+ *                 description: Additional notes about the book
  *               isbn:
  *                 type: string
- *                 description: ISBN del libro (opcional).
+ *                 description: ISBN of the book
+ *               description:
+ *                 type: string
+ *                 description: Description of the book
+ *               publisher:
+ *                 type: string
+ *                 description: Publisher of the book
+ *               publish_date:
+ *                 type: string
+ *                 description: Publish date of the book in ISO 8601 format
+ *               pages:
+ *                 type: integer
+ *                 description: Number of pages in the book
  *               cover_image:
  *                 type: string
  *                 format: binary
- *                 description: Imagen de portada del libro (opcional).
- *               description:
- *                 type: string
- *                 description: Descripción del libro (opcional).
- *               publisher:
- *                 type: string
- *                 description: Nombre del editor (opcional).
- *               publish_date:
- *                 type: string
- *                 format: date
- *                 description: Fecha de publicación del libro (opcional).
+ *                 description: Cover image of the book
+ *               checked:
+ *                 type: boolean
+ *                 description: Whether the book is checked or not
  *     responses:
  *       201:
- *         description: Libro creado exitosamente.
+ *         description: Book created successfully
  *       400:
- *         description: Error en la validación de datos.
- *
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /books:
  *   get:
- *     summary: Obtener todos los libros del usuario
+ *     summary: Get all books
  *     tags: [Books]
- *     security:
- *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de libros obtenida correctamente.
- *       401:
- *         description: No autorizado.
- *
- * /api/books/{id}:
+ *         description: List of books
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Book'
+ */
+
+/**
+ * @swagger
+ * /books/{id}:
  *   delete:
- *     summary: Eliminar un libro por ID
+ *     summary: Delete a book by ID
  *     tags: [Books]
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: The ID of the book to delete
  *         schema:
- *           type: integer
- *         description: ID del libro a eliminar.
+ *           type: string
  *     responses:
  *       204:
- *         description: Libro eliminado exitosamente.
+ *         description: Book deleted successfully
  *       404:
- *         description: Libro no encontrado.
- *
+ *         description: Book not found
+ */
+
+/**
+ * @swagger
+ * /books/{id}:
  *   patch:
- *     summary: Actualizar un libro por ID
+ *     summary: Update a book by ID
  *     tags: [Books]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: The ID of the book to update
  *         schema:
- *           type: integer
- *         description: ID del libro a actualizar.
+ *           type: string
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -206,33 +246,40 @@ export default router;
  *             properties:
  *               title:
  *                 type: string
- *                 description: Nuevo título del libro.
+ *                 description: Title of the book
  *               author:
  *                 type: string
- *                 description: Nuevo autor del libro.
+ *                 description: Author of the book
  *               notes:
  *                 type: string
- *                 description: Nuevas notas sobre el libro (opcional).
+ *                 description: Additional notes about the book
  *               isbn:
  *                 type: string
- *                 description: ISBN del libro (opcional).
+ *                 description: ISBN of the book
+ *               description:
+ *                 type: string
+ *                 description: Description of the book
+ *               publisher:
+ *                 type: string
+ *                 description: Publisher of the book
+ *               publish_date:
+ *                 type: string
+ *                 description: Publish date of the book in ISO 8601 format
+ *               pages:
+ *                 type: integer
+ *                 description: Number of pages in the book
  *               cover_image:
  *                 type: string
  *                 format: binary
- *                 description: Nueva imagen de portada del libro (opcional).
- *               description:
- *                 type: string
- *                 description: Descripción del libro (opcional).
- *               publisher:
- *                 type: string
- *                 description: Nombre del editor (opcional).
- *               publish_date:
- *                 type: string
- *                 format: date
- *                 description: Fecha de publicación del libro (opcional).
+ *                 description: Cover image of the book
+ *               checked:
+ *                 type: boolean
+ *                 description: Whether the book is checked or not
  *     responses:
  *       200:
- *         description: Libro actualizado exitosamente.
+ *         description: Book updated successfully
+ *       400:
+ *         description: Invalid input
  *       404:
- *         description: Libro no encontrado.
+ *         description: Book not found
  */

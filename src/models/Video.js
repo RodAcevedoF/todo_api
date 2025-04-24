@@ -1,6 +1,6 @@
 import db from "../config/db.js";
+
 export default class Video {
-  // Verifica si el video ya existe para un usuario dado
   static async exists(userId, video_id) {
     const { rows } = await db.query(
       "SELECT id FROM videos WHERE user_id = $1 AND video_id = $2",
@@ -9,7 +9,6 @@ export default class Video {
     return rows.length > 0;
   }
 
-  // Crea un nuevo video, si no existe previamente
   static async create(
     userId,
     {
@@ -20,15 +19,20 @@ export default class Video {
       thumbnail = null,
       description = null,
       created_at,
-      channelId = null // Nuevo campo añadido con valor predeterminado
+      channelId = null,
+      views = 0,
+      duration_seconds = 0,
+      checked = false
     }
   ) {
     if (await this.exists(userId, video_id)) {
-      throw new Error("El video ya está guardado.");
+      throw new Error("Video is already saved.");
     }
     const { rows } = await db.query(
-      `INSERT INTO videos (user_id, video_id, title, channel, notes, thumbnail, description, created_at, channelId) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+      `INSERT INTO videos 
+        (user_id, video_id, title, channel, notes, thumbnail, description, created_at, channelId, views, duration_seconds, checked) 
+       VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
        RETURNING *`,
       [
         userId,
@@ -39,13 +43,15 @@ export default class Video {
         thumbnail,
         description,
         created_at,
-        channelId
+        channelId,
+        views,
+        duration_seconds,
+        checked
       ]
     );
     return rows[0];
   }
 
-  // Obtiene los videos de un usuario con paginación
   static async findByUser(userId, limit = 10, offset = 0) {
     const { rows } = await db.query(
       `SELECT * FROM videos 
@@ -57,7 +63,6 @@ export default class Video {
     return rows;
   }
 
-  // Obtiene un video por su ID y usuario
   static async findById(id, userId) {
     const { rows } = await db.query(
       "SELECT * FROM videos WHERE id = $1 AND user_id = $2",
@@ -66,7 +71,6 @@ export default class Video {
     return rows[0];
   }
 
-  // Elimina un video dado su ID y usuario
   static async delete(id, userId) {
     const { rowCount } = await db.query(
       "DELETE FROM videos WHERE id = $1 AND user_id = $2",
@@ -75,15 +79,13 @@ export default class Video {
     return rowCount > 0;
   }
 
-  // Actualiza campos del video; se evita actualizar el videoId
-  // Si deseas impedir actualizar también channelId, puedes filtrarlo en el array de keys.
   static async update(id, userId, data) {
     const keys = Object.keys(data).filter((key) => key !== "videoId");
-    if (!keys.length) throw new Error("No hay campos válidos para actualizar");
+    if (!keys.length) throw new Error("No fields to update.");
 
     const fields = keys.map((key, index) => `${key} = $${index + 1}`);
     const values = keys.map((key) => data[key]);
-    // Agregamos el id y userId al final
+
     values.push(id, userId);
 
     const query = `

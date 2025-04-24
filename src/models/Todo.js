@@ -2,13 +2,13 @@ import db from "../config/db.js";
 export default class Todo {
   static async create(
     userId,
-    { title, description, deadline, fileUrl, priority }
+    { title, description, deadline, fileUrl, priority, checked = false }
   ) {
     const { rows } = await db.query(
-      `INSERT INTO todos (user_id, title, description, deadline, file_url, priority) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO todos (user_id, title, description, deadline, file_url, priority, checked) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING *`,
-      [userId, title, description, deadline, fileUrl, priority]
+      [userId, title, description, deadline, fileUrl, priority, checked]
     );
     return rows[0];
   }
@@ -25,6 +25,9 @@ export default class Todo {
   }
 
   static async update(id, userId, updates) {
+    if ("checked" in updates) {
+      updates.checked = updates.checked === "true" || updates.checked === true;
+    }
     if (updates.fileUrl !== undefined) {
       updates.file_url = updates.fileUrl;
       delete updates.fileUrl;

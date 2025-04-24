@@ -40,6 +40,9 @@ export const createVideo = async (req, res) => {
     const video = await Video.create(req.user.id, {
       video_id: req.body.video_id,
       ...videoData,
+      views: parseInt(req.body.views) || 0,
+      duration_seconds: parseInt(req.body.duration_seconds) || 0,
+      checked: req.body.checked === "true" || req.body.checked === true,
       description: description || null,
       created_at: created_at ? new Date(created_at) : new Date(),
       thumbnail: req.file ? req.file.filename : thumbnail || null
@@ -88,10 +91,9 @@ export const updateVideo = async (req, res) => {
     if (req.file) {
       videoData.thumbnail = req.file.filename;
     }
-    // Evitar actualizar el videoId, ya que es un identificador inmutable.
-    //if (videoData.videoId) delete videoData.videoId;
-    // Opcional: Si no deseas que se actualice el channelId, puedes descomentar la siguiente línea.
-    // if (videoData.channelId) delete videoData.channelId;
+
+    if (videoData.videoId) delete videoData.videoId;
+    if (videoData.channelId) delete videoData.channelId;
 
     if (videoData.created_at) {
       videoData.created_at = new Date(videoData.created_at);
@@ -99,6 +101,17 @@ export const updateVideo = async (req, res) => {
     if (Object.keys(videoData).length === 0) {
       return errorResponse(res, "No valid fields provided", 400);
     }
+    if ("views" in videoData) {
+      videoData.views = parseInt(videoData.views) || 0;
+    }
+    if ("duration_seconds" in videoData) {
+      videoData.duration_seconds = parseInt(videoData.duration_seconds) || 0;
+    }
+    if ("checked" in videoData) {
+      videoData.checked =
+        videoData.checked === "true" || videoData.checked === true;
+    }
+
     const video = await Video.update(req.params.id, req.user.id, videoData);
     if (!video) return errorResponse(res, "Video not found", 404);
     return successResponse(res, video);

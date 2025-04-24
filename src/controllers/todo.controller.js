@@ -19,7 +19,13 @@ export const createTodo = async (req, res) => {
   }
 
   try {
-    const { title, description, deadline, priority } = req.body;
+    const {
+      title,
+      description,
+      deadline,
+      priority,
+      checked = false
+    } = req.body;
     const fileUrl = req.file ? req.file.path : null; // Si no hay archivo, fileUrl será null
 
     const newTodo = await Todo.create(req.user.id, {
@@ -27,7 +33,8 @@ export const createTodo = async (req, res) => {
       description,
       deadline,
       fileUrl,
-      priority
+      priority,
+      checked
     });
 
     res.status(201).json({
@@ -53,7 +60,9 @@ export const updateTodo = async (req, res) => {
   try {
     const updates = req.body;
     if (req.file) updates.fileUrl = req.file.path; // Si hay archivo, lo asignamos a fileUrl
-
+    if ("checked" in updates) {
+      updates.checked = updates.checked === "true" || updates.checked === true;
+    }
     const updatedTodo = await Todo.update(req.params.id, req.user.id, updates);
 
     if (!updatedTodo) {

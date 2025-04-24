@@ -23,132 +23,148 @@ router.get("/file/:filename", getFile);
 export default router;
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Todo:
+ *       type: object
+ *       required:
+ *         - title
+ *       properties:
+ *         title:
+ *           type: string
+ *           description: Title of the to-do item
+ *         description:
+ *           type: string
+ *           description: Description of the to-do item
+ *         checked:
+ *           type: boolean
+ *           description: Whether the to-do item is checked or not
+ *         file:
+ *           type: string
+ *           format: binary
+ *           description: File related to the to-do item (if any)
+ */
+
+/**
+ * @swagger
  * tags:
- *   name: Todos
- *   description: Gestión de tareas
- *
- * /api/todos:
+ *   name: To-do
+ *   description: To-do management operations
+ */
+
+/**
+ * @swagger
+ * /todos:
  *   post:
- *     summary: Crear una nueva tarea
- *     tags: [Todos]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
+ *     summary: Create a new to-do
+ *     tags: [To-do]
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 description: Título de la tarea.
- *               description:
- *                 type: string
- *                 description: Descripción de la tarea.
- *               due_date:
- *                 type: string
- *                 format: date
- *                 description: Fecha de vencimiento de la tarea (opcional).
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: Archivo adjunto a la tarea (opcional).
+ *             $ref: '#/components/schemas/Todo'
  *     responses:
  *       201:
- *         description: Tarea creada exitosamente.
+ *         description: To-do item created successfully
  *       400:
- *         description: Error en la validación de datos.
- *
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized, invalid token
+ */
+
+/**
+ * @swagger
+ * /todos:
  *   get:
- *     summary: Obtener todas las tareas del usuario
- *     tags: [Todos]
- *     security:
- *       - BearerAuth: []
+ *     summary: Get all to-do items
+ *     tags: [To-do]
  *     responses:
  *       200:
- *         description: Lista de tareas obtenida correctamente.
+ *         description: List of to-do items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
  *       401:
- *         description: No autorizado.
- *
- * /api/todos/{id}:
+ *         description: Unauthorized, invalid token
+ */
+
+/**
+ * @swagger
+ * /todos/{id}:
  *   put:
- *     summary: Actualizar una tarea por ID
- *     tags: [Todos]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
+ *     summary: Update a to-do item by ID
+ *     tags: [To-do]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID of the to-do item to update
  *         schema:
- *           type: integer
- *         description: ID de la tarea a actualizar.
+ *           type: string
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 description: Nuevo título de la tarea.
- *               description:
- *                 type: string
- *                 description: Nueva descripción de la tarea.
- *               due_date:
- *                 type: string
- *                 format: date
- *                 description: Nueva fecha de vencimiento de la tarea (opcional).
- *               file:
- *                 type: string
- *                 format: binary
- *                 description: Nuevo archivo adjunto a la tarea (opcional).
+ *             $ref: '#/components/schemas/Todo'
  *     responses:
  *       200:
- *         description: Tarea actualizada exitosamente.
+ *         description: To-do item updated successfully
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized, invalid token
  *       404:
- *         description: Tarea no encontrada.
- *
+ *         description: To-do item not found
+ */
+
+/**
+ * @swagger
+ * /todos/{id}:
  *   delete:
- *     summary: Eliminar una tarea por ID
- *     tags: [Todos]
- *     security:
- *       - BearerAuth: []
+ *     summary: Delete a to-do item by ID
+ *     tags: [To-do]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID of the to-do item to delete
  *         schema:
- *           type: integer
- *         description: ID de la tarea a eliminar.
+ *           type: string
  *     responses:
- *       204:
- *         description: Tarea eliminada exitosamente.
+ *       200:
+ *         description: To-do item deleted successfully
+ *       401:
+ *         description: Unauthorized, invalid token
  *       404:
- *         description: Tarea no encontrada.
- *
- * /api/todos/file/{filename}:
+ *         description: To-do item not found
+ */
+
+/**
+ * @swagger
+ * /todos/file/{filename}:
  *   get:
- *     summary: Obtener un archivo adjunto de una tarea
- *     tags: [Todos]
- *     security:
- *       - BearerAuth: []
+ *     summary: Get a file related to a to-do item
+ *     tags: [To-do]
  *     parameters:
  *       - in: path
  *         name: filename
  *         required: true
+ *         description: Name of the file to retrieve
  *         schema:
  *           type: string
- *         description: Nombre del archivo a descargar.
  *     responses:
  *       200:
- *         description: Archivo obtenido exitosamente.
+ *         description: File retrieved successfully
+ *         content:
+ *           application/octet-stream:
+ *             schema:
+ *               type: string
+ *               format: binary
  *       404:
- *         description: Archivo no encontrado.
+ *         description: File not found
  */

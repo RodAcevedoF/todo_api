@@ -69,43 +69,111 @@ router.put(
 );
 
 export default router;
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Name of the user
+ *         email:
+ *           type: string
+ *           description: Email of the user
+ *         password:
+ *           type: string
+ *           description: Password for the user account
+ *         phone:
+ *           type: string
+ *           description: Phone number of the user
+ *     AuthTokens:
+ *       type: object
+ *       required:
+ *         - accessToken
+ *         - refreshToken
+ *       properties:
+ *         accessToken:
+ *           type: string
+ *           description: Access token for the authenticated user
+ *         refreshToken:
+ *           type: string
+ *           description: Refresh token for obtaining a new access token
+ */
 
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: Gestión de autenticación de usuarios
- *
- * /api/auth/register:
+ *   description: Authentication and authorization operations
+ */
+
+/**
+ * @swagger
+ * /auth/register:
  *   post:
- *     summary: Registrar un nuevo usuario
+ *     summary: Register a new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Nombre del usuario.
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Correo electrónico del usuario.
- *               password:
- *                 type: string
- *                 description: Contraseña (mínimo 6 caracteres).
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
- *         description: Usuario registrado exitosamente.
+ *         description: User registered successfully
  *       400:
- *         description: Error en la validación de datos.
- *
- * /api/auth/login:
+ *         description: Invalid input or already existing user
+ */
+
+/**
+ * @swagger
+ * /auth/login:
  *   post:
- *     summary: Iniciar sesión
+ *     summary: Login with email and password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthTokens'
+ *       400:
+ *         description: Invalid credentials
+ */
+
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout the user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *       401:
+ *         description: Unauthorized, invalid token
+ */
+
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refresh the access token using the refresh token
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -114,56 +182,41 @@ export default router;
  *           schema:
  *             type: object
  *             properties:
- *               email:
+ *               refreshToken:
  *                 type: string
- *                 format: email
- *                 description: Correo electrónico del usuario.
- *               password:
- *                 type: string
- *                 description: Contraseña del usuario.
+ *                 description: The refresh token to get a new access token
  *     responses:
  *       200:
- *         description: Inicio de sesión exitoso.
- *       401:
- *         description: Credenciales incorrectas.
- *
- * /api/auth/logout:
- *   post:
- *     summary: Cerrar sesión
- *     tags: [Auth]
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Cierre de sesión exitoso.
- *       401:
- *         description: No autorizado.
- *
- * /api/auth/profile:
+ *         description: Access token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthTokens'
+ *       400:
+ *         description: Invalid or expired refresh token
+ */
+
+/**
+ * @swagger
+ * /auth/profile:
  *   put:
- *     summary: Actualizar perfil del usuario
+ *     summary: Update user profile (name, email, phone)
  *     tags: [Auth]
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Nuevo nombre del usuario.
- *               email:
- *                 type: string
- *                 format: email
- *                 description: Nuevo correo electrónico.
+ *             $ref: '#/components/schemas/User'
  *     responses:
  *       200:
- *         description: Perfil actualizado exitosamente.
+ *         description: Profile updated successfully
  *       400:
- *         description: Error en la validación de datos.
+ *         description: Invalid input
  *       401:
- *         description: No autorizado.
+ *         description: Unauthorized, invalid token
+ *       404:
+ *         description: User not found
  */

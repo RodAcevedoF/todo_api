@@ -7,7 +7,7 @@ export const createCategory = async (req, res) => {
     const { name } = req.body;
 
     if (!name) {
-      return errorResponse(res, "El nombre de la categoría es obligatorio", 400);
+      return errorResponse(res, "Category name is required", 400);
     }
 
     const category = await Category.create(name);
@@ -33,7 +33,7 @@ export const addCategoriesToBook = async (req, res) => {
   const { categories } = req.body; // Array de IDs de categorías
 
   if (!Array.isArray(categories) || categories.length === 0) {
-    return errorResponse(res, "Debes proporcionar un arreglo de categorías válidas", 400);
+    return errorResponse(res, "A categories array must be provided", 400);
   }
 
   try {

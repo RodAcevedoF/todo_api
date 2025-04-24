@@ -22,25 +22,34 @@ router.post(
   "/",
   upload.single("thumbnail"),
   [
-    check("video_id").notEmpty().withMessage("El ID del video es obligatorio"),
-    check("title").notEmpty().withMessage("El título es obligatorio"),
-    check("channel").notEmpty().withMessage("El canal es obligatorio"),
+    check("video_id").notEmpty().withMessage("Video ID required"),
+    check("title").notEmpty().withMessage("Video title is required"),
+    check("channel").notEmpty().withMessage("Channel is required"),
     check("channelId")
       .optional()
       .isString()
-      .withMessage("El ID del canal debe ser texto"),
-    check("notes")
-      .optional()
-      .isString()
-      .withMessage("Las notas deben ser texto"),
+      .withMessage("Channel ID must be text"),
+    check("notes").optional().isString().withMessage("Notes must be text"),
     check("description")
       .optional()
       .isString()
-      .withMessage("La descripción debe ser texto"),
+      .withMessage("Description must be text"),
     check("created_at")
       .optional()
       .isISO8601()
-      .withMessage("La fecha de creación debe ser válida en formato ISO8601")
+      .withMessage("Creation date must be ISO8601 format"),
+    check("views")
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage("Views must be a positive number"),
+    check("duration_seconds")
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage("Duration must be a positive number"),
+    check("checked")
+      .optional()
+      .isBoolean()
+      .withMessage("Field 'checked' must be a boolean")
   ],
   createVideo
 );
@@ -54,146 +63,166 @@ router.patch(
   upload.single("thumbnail"),
   excludeVideoId,
   [
-    check("title")
-      .optional()
-      .isString()
-      .withMessage("El título debe ser texto"),
+    check("title").optional().isString().withMessage("Title must be text"),
     check("channel")
       .optional()
       .isString()
-      .withMessage("El canal debe ser texto"),
+      .withMessage("Channel field must be text"),
     check("channelId")
       .optional()
       .isString()
-      .withMessage("El ID del canal debe ser texto"),
-    check("notes")
-      .optional()
-      .isString()
-      .withMessage("Las notas deben ser texto"),
+      .withMessage("Channel ID must be text"),
+    check("notes").optional().isString().withMessage("Notes must be text"),
     check("description")
       .optional()
       .isString()
-      .withMessage("La descripción debe ser texto"),
+      .withMessage("Description must be text"),
     check("created_at")
       .optional()
       .isISO8601()
-      .withMessage("La fecha de creación debe ser válida en formato ISO8601")
+      .withMessage("Creation date must be ISO8601 format"),
+    check("views")
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage("Views must be a positive number"),
+    check("duration_seconds")
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage("Duration must be a positive number"),
+    check("checked")
+      .optional()
+      .isBoolean()
+      .withMessage("Field 'checked' must be a boolean")
   ],
   updateVideo
 );
 
 export default router;
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Video:
+ *       type: object
+ *       required:
+ *         - video_id
+ *         - title
+ *         - channel
+ *       properties:
+ *         video_id:
+ *           type: string
+ *           description: Video ID
+ *         title:
+ *           type: string
+ *           description: Video title
+ *         channel:
+ *           type: string
+ *           description: Video channel name
+ *         channelId:
+ *           type: string
+ *           description: ID of the channel
+ *         notes:
+ *           type: string
+ *           description: Video notes
+ *         description:
+ *           type: string
+ *           description: Video description
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: Creation date
+ *         views:
+ *           type: integer
+ *           description: Number of views
+ *         duration_seconds:
+ *           type: integer
+ *           description: Duration in seconds
+ *         checked:
+ *           type: boolean
+ *           description: Video checked status
+ */
 
 /**
  * @swagger
  * tags:
  *   name: Videos
- *   description: Gestión de videos
- *
- * /api/videos:
+ *   description: Operations related to videos
+ */
+
+/**
+ * @swagger
+ * /videos:
  *   post:
- *     summary: Crear un nuevo video
+ *     summary: Create a new video
  *     tags: [Videos]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               videoId:
- *                 type: string
- *                 description: ID del video en YouTube.
- *               title:
- *                 type: string
- *                 description: Título del video.
- *               channel:
- *                 type: string
- *                 description: Nombre del canal del video.
- *               notes:
- *                 type: string
- *                 description: Notas sobre el video (opcional).
- *               thumbnail:
- *                 type: string
- *                 format: binary
- *                 description: Miniatura del video (archivo opcional).
+ *             $ref: '#/components/schemas/Video'
  *     responses:
  *       201:
- *         description: Video creado exitosamente.
+ *         description: Video created successfully
  *       400:
- *         description: Error en la validación de datos.
- *
+ *         description: Invalid input
+ */
+
+/**
+ * @swagger
+ * /videos:
  *   get:
- *     summary: Obtener todos los videos del usuario
+ *     summary: Get all videos
  *     tags: [Videos]
- *     security:
- *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de videos obtenida correctamente.
- *       401:
- *         description: No autorizado.
- *
- * /api/videos/{id}:
+ *         description: List of videos
+ */
+
+/**
+ * @swagger
+ * /videos/{id}:
  *   delete:
- *     summary: Eliminar un video por ID
+ *     summary: Delete a video
  *     tags: [Videos]
- *     security:
- *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: Video ID to delete
  *         schema:
- *           type: integer
- *         description: ID del video a eliminar.
+ *           type: string
  *     responses:
  *       204:
- *         description: Video eliminado exitosamente.
+ *         description: Video deleted successfully
  *       404:
- *         description: Video no encontrado.
- *
+ *         description: Video not found
+ */
+
+/**
+ * @swagger
+ * /videos/{id}:
  *   patch:
- *     summary: Actualizar un video por ID
+ *     summary: Update a video
  *     tags: [Videos]
- *     security:
- *       - BearerAuth: []
- *     consumes:
- *       - multipart/form-data
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: Video ID to update
  *         schema:
- *           type: integer
- *         description: ID del video a actualizar.
+ *           type: string
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *                 description: Nuevo título del video.
- *               channel:
- *                 type: string
- *                 description: Nuevo nombre del canal.
- *               notes:
- *                 type: string
- *                 description: Nuevas notas sobre el video (opcional).
- *               thumbnail:
- *                 type: string
- *                 format: binary
- *                 description: Nueva miniatura del video (archivo opcional).
+ *             $ref: '#/components/schemas/Video'
  *     responses:
  *       200:
- *         description: Video actualizado exitosamente.
+ *         description: Video updated successfully
  *       404:
- *         description: Video no encontrado.
+ *         description: Video not found
+ *       400:
+ *         description: Invalid input
  */

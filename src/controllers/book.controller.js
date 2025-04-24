@@ -21,6 +21,7 @@ export const createBook = async (req, res) => {
       publisher,
       publish_date,
       categories = [],
+      checked = false,
       ...bookData
     } = req.body;
 
@@ -46,13 +47,14 @@ export const createBook = async (req, res) => {
       description: description || null,
       publisher: publisher || null,
       publish_date: publish_date || null,
-      categories: parsedCategories // Enviamos las categorías procesadas
+      categories: parsedCategories, // Enviamos las categorías procesadas
+      checked
     });
     console.log(bookData);
 
     return successResponse(res, book, 201);
   } catch (error) {
-    console.error("Error en createBook:", error.message);
+    console.error("Error creating book:", error.message);
     return errorResponse(res, error.message);
   }
 };
@@ -73,7 +75,7 @@ export const getBooks = async (req, res) => {
 
     return successResponse(res, formattedBooks);
   } catch (error) {
-    console.error("Error en getBooks:", error.message);
+    console.error("Error gettting books:", error.message);
     return errorResponse(res, error.message);
   }
 };
@@ -84,7 +86,7 @@ export const deleteBook = async (req, res) => {
     if (!deleted) return errorResponse(res, "Book not found", 404);
     return successResponse(res, null, 204);
   } catch (error) {
-    console.error("Error en deleteBook:", error.message);
+    console.error("Error deleting book:", error.message);
     return errorResponse(res, error.message);
   }
 };
@@ -106,6 +108,7 @@ export const updateBook = async (req, res) => {
       publisher,
       publish_date,
       categories = [],
+      checked,
       ...bookData
     } = req.body;
 
@@ -126,6 +129,7 @@ export const updateBook = async (req, res) => {
     if (pages !== undefined) bookData.pages = pages; // Incluimos `pages` si está presente
     if (description) bookData.description = description;
     if (publisher) bookData.publisher = publisher;
+    if (checked !== undefined) bookData.checked = checked;
     if (publish_date) bookData.publish_date = publish_date;
     if (parsedCategories.length > 0) bookData.categories = parsedCategories; // Incluimos categorías
 

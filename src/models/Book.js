@@ -24,7 +24,8 @@ export default class Book {
       publisher = null,
       publish_date = null,
       pages = null,
-      categories = []
+      categories = [],
+      checked = false
     }
   ) {
     if (await this.exists(userId, apiId)) {
@@ -32,8 +33,8 @@ export default class Book {
     }
 
     const query = `
-      INSERT INTO books (user_id, api_id, title, author, notes, cover_image, isbn, description, publisher, publish_date, pages) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO books (user_id, api_id, title, author, notes, cover_image, isbn, description, publisher, publish_date, pages, checked) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `;
     const { rows } = await db.query(query, [
@@ -47,7 +48,8 @@ export default class Book {
       description,
       publisher,
       publish_date,
-      pages
+      pages,
+      checked
     ]);
 
     const book = rows[0];
@@ -112,11 +114,15 @@ export default class Book {
           "description",
           "publisher",
           "publish_date",
-          "pages"
+          "pages",
+          "checked"
         ].includes(key) // Agregamos "pages"
     );
 
-    if (!keys.length) throw new Error("No hay campos válidos para actualizar");
+    if (!keys.length) throw new Error("No valid fields provided");
+    if ("checked" in data) {
+      data.checked = data.checked === "true" || data.checked === true;
+    }
 
     const fields = keys.map((key, index) => `${key} = $${index + 1}`);
     const values = keys.map((key) => data[key]);
