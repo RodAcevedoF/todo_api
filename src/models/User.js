@@ -13,15 +13,36 @@ export default class User {
     github_url = null,
     birth_date = null,
     hobbies = null,
-    location = null
+    location = null,
+    nickname = null
   }) {
     try {
       const hashedPassword = await bcrypt.hash(password, 12);
+
+      // Generar nickname único si no se proporciona
+      if (!nickname) {
+        let isUnique = false;
+        let generatedNickname = "";
+        const base = name.trim().toLowerCase().replace(/\s+/g, "");
+
+        while (!isUnique) {
+          const randomNumber = Math.floor(100000 + Math.random() * 900000);
+          generatedNickname = `@${base}${randomNumber}`;
+          const { rows } = await db.query(
+            "SELECT 1 FROM users WHERE nickname = $1",
+            [generatedNickname]
+          );
+          isUnique = rows.length === 0;
+        }
+
+        nickname = generatedNickname;
+      }
+
       const { rows } = await db.query(
         `INSERT INTO users 
-           (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
-           RETURNING *`,
+            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
+            RETURNING *`,
         [
           name,
           email,
@@ -33,9 +54,11 @@ export default class User {
           github_url,
           birth_date,
           hobbies,
-          location
+          location,
+          nickname
         ]
       );
+
       return rows[0];
     } catch (error) {
       console.error("Error creating user:", error);
@@ -45,7 +68,7 @@ export default class User {
 
   static async findById(id) {
     const { rows } = await db.query(
-      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location 
+      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname 
        FROM users 
        WHERE id = $1`,
       [id]
@@ -79,7 +102,7 @@ export default class User {
       `UPDATE users 
        SET ${setClause} 
        WHERE id = $1 
-       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location`,
+       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
       values
     );
     return rows[0];
@@ -90,7 +113,7 @@ export default class User {
       `UPDATE users 
        SET profile_image = $1 
        WHERE id = $2 
-       RETURNING id, name, email, description, profile_image, phone`,
+       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
       [profileImagePath, id]
     );
     return rows[0];

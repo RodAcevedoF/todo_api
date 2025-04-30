@@ -56,7 +56,12 @@ export const register = async (req, res) => {
     return successResponse(
       res,
       {
-        user: { id: user.id, name: user.name, email: user.email },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          nickname: user.nickname
+        },
         accessToken,
         refreshToken
       },
@@ -119,7 +124,12 @@ export const login = async (req, res) => {
     console.log("Refresh token saved to database.");
 
     return successResponse(res, {
-      user: { id: user.id, name: user.name, email: user.email },
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        nickname: user.nickname // 👈 Aquí lo agregas
+      },
       accessToken,
       refreshToken
     });
@@ -189,7 +199,8 @@ export const updateProfile = async (req, res) => {
       "github_url",
       "birth_date",
       "hobbies",
-      "location"
+      "location",
+      "nickname"
     ];
 
     const validUpdates = Object.keys(updates).filter((key) =>
