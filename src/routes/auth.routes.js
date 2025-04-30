@@ -5,7 +5,9 @@ import {
   login,
   logout,
   updateProfile,
-  refreshAccessToken
+  refreshAccessToken,
+  getProfile,
+  deleteUser
 } from "../controllers/auth.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import { validateRefreshToken } from "../middlewares/auth.js"; // Middleware para refresh tokens
@@ -21,8 +23,8 @@ const validateRegister = [
   check("name").notEmpty().withMessage("Name is required"),
   check("email").isEmail().withMessage("Invalid email format"),
   check("password")
-    .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long")
 ];
 
 const validateLogin = [
@@ -68,7 +70,14 @@ router.put(
   updateProfile
 );
 
+// Nueva ruta para obtener el perfil del usuario autenticado
+router.get("/profile", authenticate, getProfile);
+
+// Nueva ruta para eliminar la cuenta de usuario
+router.delete("/deleteUser", authenticate, deleteUser);
+
 export default router;
+
 /**
  * @swagger
  * components:
@@ -76,6 +85,7 @@ export default router;
  *     User:
  *       type: object
  *       required:
+ *         - name
  *         - email
  *         - password
  *       properties:
@@ -84,40 +94,34 @@ export default router;
  *           description: Name of the user
  *         email:
  *           type: string
- *           description: Email of the user
+ *           description: Email address of the user
  *         password:
  *           type: string
- *           description: Password for the user account
+ *           description: Password of the user
  *         phone:
  *           type: string
- *           description: Phone number of the user
- *     AuthTokens:
- *       type: object
- *       required:
- *         - accessToken
- *         - refreshToken
- *       properties:
+ *           description: Phone number of the user (optional)
  *         accessToken:
  *           type: string
  *           description: Access token for the authenticated user
  *         refreshToken:
  *           type: string
- *           description: Refresh token for obtaining a new access token
+ *           description: Refresh token for the authenticated user
  */
 
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: Authentication and authorization operations
+ *   name: Authentication
+ *   description: User authentication and profile management
  */
 
 /**
  * @swagger
- * /auth/register:
+ * /register:
  *   post:
  *     summary: Register a new user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -126,55 +130,72 @@ export default router;
  *             $ref: '#/components/schemas/User'
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User successfully registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *       400:
- *         description: Invalid input or already existing user
+ *         description: Invalid input or email already in use
+ *       500:
+ *         description: Server error
  */
 
 /**
  * @swagger
- * /auth/login:
+ * /login:
  *   post:
- *     summary: Login with email and password
- *     tags: [Auth]
+ *     summary: Login a user
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email address of the user
+ *               password:
+ *                 type: string
+ *                 description: Password of the user
  *     responses:
  *       200:
- *         description: User logged in successfully
+ *         description: User successfully logged in
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthTokens'
- *       400:
- *         description: Invalid credentials
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Invalid email or password
+ *       500:
+ *         description: Server error
  */
 
 /**
  * @swagger
- * /auth/logout:
+ * /logout:
  *   post:
- *     summary: Logout the user
- *     tags: [Auth]
+ *     summary: Logout the user and invalidate the tokens
+ *     tags: [Authentication]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: User logged out successfully
+ *         description: Successfully logged out
  *       401:
- *         description: Unauthorized, invalid token
+ *         description: Unauthorized (missing or invalid token)
+ *       500:
+ *         description: Server error
  */
 
 /**
  * @swagger
- * /auth/refresh:
+ * /refresh:
  *   post:
- *     summary: Refresh the access token using the refresh token
- *     tags: [Auth]
+ *     summary: Refresh access token using a refresh token
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
@@ -184,39 +205,107 @@ export default router;
  *             properties:
  *               refreshToken:
  *                 type: string
- *                 description: The refresh token to get a new access token
+ *                 description: Refresh token to get a new access token
  *     responses:
  *       200:
- *         description: Access token refreshed successfully
+ *         description: Successfully refreshed access token
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthTokens'
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   description: New access token
  *       400:
- *         description: Invalid or expired refresh token
+ *         description: Invalid refresh token
+ *       500:
+ *         description: Server error
  */
 
 /**
  * @swagger
- * /auth/profile:
- *   put:
- *     summary: Update user profile (name, email, phone)
- *     tags: [Auth]
+ * /profile:
+ *   get:
+ *     summary: Get the authenticated user's profile
+ *     tags: [Authentication]
  *     security:
- *       - bearerAuth: []
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully fetched the user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /profile:
+ *   put:
+ *     summary: Update the authenticated user's profile
+ *     tags: [Authentication]
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/User'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the user
+ *               email:
+ *                 type: string
+ *                 description: Email address of the user
+ *               phone:
+ *                 type: string
+ *                 description: Phone number of the user (optional)
  *     responses:
  *       200:
- *         description: Profile updated successfully
+ *         description: Successfully updated user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *       400:
  *         description: Invalid input
  *       401:
- *         description: Unauthorized, invalid token
- *       404:
- *         description: User not found
+ *         description: Unauthorized (missing or invalid token)
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /deleteUser:
+ *   delete:
+ *     summary: Delete the user's account
+ *     tags: [Authentication]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully deleted the user account
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */

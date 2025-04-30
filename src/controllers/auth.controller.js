@@ -99,7 +99,7 @@ export const login = async (req, res) => {
     }
 
     const accessToken = User.generateToken(user);
-    console.log("Access token generated:", accessToken);
+    console.log("Access token generated");
 
     // Eliminar refresh tokens anteriores para este usuario
     await db.query("DELETE FROM refresh_tokens WHERE user_id = $1", [user.id]);
@@ -109,7 +109,7 @@ export const login = async (req, res) => {
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "7d" }
     );
-    console.log("Refresh token generated:", refreshToken);
+    console.log("Refresh token generated");
 
     // Guardar el nuevo refresh token en la base de datos
     await db.query(
@@ -184,8 +184,14 @@ export const updateProfile = async (req, res) => {
       "email",
       "description",
       "profile_image",
-      "phone"
+      "phone",
+      "website",
+      "github_url",
+      "birth_date",
+      "hobbies",
+      "location"
     ];
+
     const validUpdates = Object.keys(updates).filter((key) =>
       allowedUpdates.includes(key)
     );
@@ -250,5 +256,43 @@ export const refreshAccessToken = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, error: "Failed to refresh access token" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Eliminar el usuario
+    const result = await User.deleteUser(userId);
+
+    if (!result) {
+      return errorResponse(res, "Failed to delete user.", 500);
+    }
+
+    return successResponse(res, "User deleted successfully.", 200);
+  } catch (error) {
+    console.error("Error during user deletion:", error);
+    return errorResponse(res, "Failed to delete user.", 500);
+  }
+};
+
+/**
+ * Obtener información del perfil:
+ *  - Devuelve los datos del usuario autenticado.
+ */
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return errorResponse(res, "User not found.", 404);
+    }
+
+    return successResponse(res, { user }, 200);
+  } catch (error) {
+    console.error("Error getting profile:", error);
+    return errorResponse(res, "Failed to get profile.", 500);
   }
 };
