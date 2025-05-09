@@ -7,6 +7,7 @@ import todoRoutes from "./src/routes/todo.routes.js";
 import bookRoutes from "./src/routes/book.routes.js";
 import categoryRoutes from "./src/routes/category.routes.js";
 import videoRoutes from "./src/routes/video.routes.js";
+import dashboardRoutes from "./src/routes/dashboard.routes.js";
 import { errorHandler } from "./src/middlewares/errorHandler.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./src/config/swagger.js";
@@ -101,6 +102,7 @@ app.use("/api/todos", todoRoutes); // Rutas de tareas
 app.use("/api/books", bookRoutes); // Rutas de libros
 app.use("/api/videos", videoRoutes); // Rutas de videos
 app.use("/api/categories", categoryRoutes); // Rutas de categorías
+app.use("/api/dashboard", dashboardRoutes); // Ruta de dashboard
 
 // Manejo de errores en rutas inexistentes
 app.use((req, res, next) => {
