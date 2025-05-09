@@ -29,8 +29,12 @@ export const authenticate = async (req, res, next) => {
     // Verificación del token JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Expresión regular para validar un UUID v4
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     // Verificar que el ID en el token es un UUID válido
-    if (!uuidv4().test(decoded.id)) {
+    if (!uuidRegex.test(decoded.id)) {
       return errorResponse(res, "Invalid user ID in token", 401);
     }
 
@@ -79,7 +83,7 @@ export const validateRefreshToken = async (req, res, next) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     // Verificar que el ID en el refresh token es un UUID válido
-    if (!uuidv4().test(decoded.id)) {
+    if (!uuidRegex.test(decoded.id)) {
       return errorResponse(res, "Invalid user ID in refresh token", 401);
     }
 
