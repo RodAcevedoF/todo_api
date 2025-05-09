@@ -312,39 +312,54 @@ export const getProfile = async (req, res) => {
   }
 };
 
-export const updatePassAndEmail = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+export const updateSensitiveDataController = async (req, res) => {
+  // 1) Validaciones de express-validator ya pasaron
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
+  }
 
-    // Validar que haya al menos uno
+  try {
+    const { email, password, currentPassword } = req.body;
+
+    // 2) Verificar campos mínimos
     if (!email && !password) {
-      return errorResponse(res, "No valid fields provided for update.", 400);
+      return errorResponse(res, "No fields to update.", 400);
+    }
+    if (!currentPassword) {
+      return errorResponse(res, "Current password is required.", 400);
     }
 
-    // Validar formato de email si viene
+    // 3) Validar formato de email
     if (email && !/\S+@\S+\.\S+/.test(email)) {
       return errorResponse(res, "Invalid email format.", 400);
     }
 
-    let updatedUser;
+    // 4) Llamar al modelo para actualizar datos sensibles
+    const updatedUser = await User.updateSensitiveData(
+      req.user.id,
+      currentPassword,
+      { newEmail: email, newPassword: password }
+    );
 
-    if (password) {
-      const hashed = await bcrypt.hash(password, 12);
-      if (email) {
-        updatedUser = await User.updatePassAndEmail(req.user.id, hashed, email);
-      } else {
-        updatedUser = await User.update(req.user.id, { password: hashed });
-      }
-    } else if (email) {
-      updatedUser = await User.update(req.user.id, { email });
-    }
-
+    // 5) Responder con el usuario actualizado (sin password)
     return successResponse(res, {
       message: "Credentials updated successfully",
       user: updatedUser
     });
   } catch (error) {
-    console.error("Error updating credentials:", error);
-    return errorResponse(res, "Failed to update credentials.", 500);
+    console.error("Error updating sensitive data:", error);
+    // Enviar mensaje de error claro (puedes detectar el error.message específico)
+    return errorResponse(
+      res,
+      error.message === "Incorrect current password"
+        ? "Current password is incorrect."
+        : "Failed to update credentials.",
+      error.message === "Incorrect current password" ? 401 : 500
+    );
   }
 };

@@ -150,12 +150,29 @@ export default class User {
     }
   }
 
-  static async updatePassAndEmail(id, newPassword, newEmail) {
-    const hashed = await bcrypt.hash(newPassword, 12);
-    const { rows } = await db.query(
-      `UPDATE users SET password = $1, email = $2 WHERE id = $3 RETURNING id`,
-      [hashed, newEmail, id]
+  static async updateSensitiveData(
+    id,
+    currentPassword,
+    { newEmail, newPassword }
+  ) {
+    // Buscar al usuario completo (incluyendo contraseña hasheada)
+    const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [id]);
+    const user = rows[0];
+    if (!user) throw new Error("User not found");
+
+    // Verificar contraseña actual
+    const passwordMatches = await this.comparePassword(
+      currentPassword,
+      user.password
     );
-    return rows[0];
+    if (!passwordMatches) throw new Error("Incorrect current password");
+
+    // Preparar actualizaciones
+    const updates = {};
+    if (newEmail) updates.email = newEmail;
+    if (newPassword) updates.password = await bcrypt.hash(newPassword, 12);
+
+    // Aplicar actualización
+    return await this.update(id, updates);
   }
 }

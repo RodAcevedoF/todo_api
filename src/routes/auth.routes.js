@@ -7,7 +7,8 @@ import {
   updateProfile,
   refreshAccessToken,
   getProfile,
-  deleteUser
+  deleteUser,
+  updateSensitiveDataController
 } from "../controllers/auth.controller.js";
 import { authenticate } from "../middlewares/auth.js";
 import { validateRefreshToken } from "../middlewares/auth.js"; // Middleware para refresh tokens
@@ -41,12 +42,15 @@ const validateProfileUpdate = [
     .withMessage("Invalid phone number format")
 ];
 
-const validateEmailOrPassUpdate = [
+const validateSensitiveUpdate = [
+  check("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required"),
   check("email").optional().isEmail().withMessage("Invalid email format"),
   check("password")
     .optional()
     .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long")
+    .withMessage("New password must be at least 8 characters long")
 ];
 
 router.post(
@@ -87,9 +91,9 @@ router.delete("/deleteUser", authenticate, deleteUser);
 router.put(
   "/credentials",
   authenticate,
-  validateEmailOrPassUpdate,
+  validateSensitiveUpdate,
   handleValidationErrors,
-  updatePassAndEmail
+  updateSensitiveDataController
 );
 
 export default router;
@@ -324,4 +328,51 @@ export default router;
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+ */
+
+/**
+ * @swagger
+ * /credentials:
+ *   put:
+ *     summary: Update user email and/or password
+ *     tags: [Authentication]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 description: The user's current password (required)
+ *               email:
+ *                 type: string
+ *                 description: New email address (optional)
+ *               password:
+ *                 type: string
+ *                 description: New password (optional, min 8 characters)
+ *     responses:
+ *       200:
+ *         description: Credentials updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Credentials updated successfully
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error or no fields provided
+ *       401:
+ *         description: Unauthorized or incorrect current password
+ *       500:
+ *         description: Server error
  */
