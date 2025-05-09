@@ -29,15 +29,15 @@ export const getDashboardInfo = async (req, res) => {
       }
     ] = await Promise.all([
       db.query(
-        `SELECT created_at FROM todos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        `SELECT created_at, title FROM todos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(
-        `SELECT created_at FROM books WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        `SELECT created_at, title FROM books WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(
-        `SELECT created_at FROM videos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        `SELECT created_at, title FROM videos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(`SELECT last_login FROM users WHERE id = $1`, [userId]),
@@ -47,9 +47,18 @@ export const getDashboardInfo = async (req, res) => {
     ]);
 
     return successResponse(res, {
-      lastTodoActivity: lastTodo?.created_at || null,
-      lastBookActivity: lastBook?.created_at || null,
-      lastVideoActivity: lastVideo?.created_at || null,
+      todo: {
+        lastTodoActivity: lastTodo?.created_at || null,
+        lastTodoTitle: lastTodo?.title || null
+      },
+      book: {
+        lastBookActivity: lastBook?.created_at || null,
+        lastBookTitle: lastBook?.title || null
+      },
+      video: {
+        lastVideoActivity: lastVideo?.created_at || null,
+        lastVideoTitle: lastVideo?.title || null
+      },
       lastLogin: userInfo?.last_login || null,
       counts: {
         todos: parseInt(todoCount?.count) || 0,
