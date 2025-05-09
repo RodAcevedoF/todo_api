@@ -29,15 +29,15 @@ export const getDashboardInfo = async (req, res) => {
       }
     ] = await Promise.all([
       db.query(
-        `SELECT updated_at FROM todos WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1`,
+        `SELECT created_at FROM todos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(
-        `SELECT updated_at FROM books WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1`,
+        `SELECT created_at FROM books WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(
-        `SELECT updated_at FROM videos WHERE user_id = $1 ORDER BY updated_at DESC LIMIT 1`,
+        `SELECT created_at FROM videos WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
       db.query(`SELECT last_login FROM users WHERE id = $1`, [userId]),
@@ -47,9 +47,9 @@ export const getDashboardInfo = async (req, res) => {
     ]);
 
     return successResponse(res, {
-      lastTodoUpdate: lastTodo?.updated_at || null,
-      lastBookUpdate: lastBook?.updated_at || null,
-      lastVideoUpdate: lastVideo?.updated_at || null,
+      lastTodoActivity: lastTodo?.created_at || null,
+      lastBookActivity: lastBook?.created_at || null,
+      lastVideoActivity: lastVideo?.created_at || null,
       lastLogin: userInfo?.last_login || null,
       counts: {
         todos: parseInt(todoCount?.count) || 0,
