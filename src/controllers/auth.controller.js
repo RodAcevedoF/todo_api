@@ -52,6 +52,7 @@ export const register = async (req, res) => {
       "INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)",
       [refreshToken, user.id]
     );
+    await User.updateLastLogin(user.id);
 
     return successResponse(
       res,
@@ -122,6 +123,8 @@ export const login = async (req, res) => {
       [refreshToken, user.id]
     );
     console.log("Refresh token saved to database.");
+
+    await User.updateLastLogin(user.id);
 
     return successResponse(res, {
       user: {

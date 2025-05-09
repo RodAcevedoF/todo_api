@@ -119,6 +119,15 @@ export default class User {
     return rows[0];
   }
 
+  static async updateLastLogin(id) {
+    try {
+      await db.query(`UPDATE users SET last_login = NOW() WHERE id = $1`, [id]);
+    } catch (error) {
+      console.error("Error updating last_login:", error);
+      throw new Error("Failed to update last login.");
+    }
+  }
+
   static async deleteUser(id) {
     const client = await db.connect();
     try {
