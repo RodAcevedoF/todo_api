@@ -1,6 +1,3 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import db from "../config/db.js";
 export default class User {
   static async create({
     name,
@@ -42,7 +39,7 @@ export default class User {
         `INSERT INTO users 
             (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING *`,
+            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
         [
           name,
           email,

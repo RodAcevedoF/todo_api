@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 import User from "../models/User.js";
 import { errorResponse } from "../utils/apiResponse.js";
+import { v4 as uuidv4 } from "uuid";
 
+// Middleware para autenticación
 export const authenticate = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -11,6 +13,7 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, "Authentication token missing", 401);
     }
 
+    // Verificar si el token está en la lista negra
     const { rows } = await db.query(
       "SELECT 1 FROM blacklisted_tokens WHERE token = $1",
       [token]
@@ -23,15 +26,24 @@ export const authenticate = async (req, res, next) => {
       );
     }
 
+    // Verificación del token JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Verificar que el ID en el token es un UUID válido
+    if (!uuidv4().test(decoded.id)) {
+      return errorResponse(res, "Invalid user ID in token", 401);
+    }
+
+    // Obtener el usuario asociado al ID decodificado
     const user = await User.findById(decoded.id);
 
     if (!user) {
       return errorResponse(res, "Invalid or expired token", 401);
     }
 
+    // Asignar el usuario al objeto `req.user`
     req.user = user;
-    next();
+    next(); // Continuar con la siguiente función de middleware o ruta
   } catch (error) {
     console.error("Authentication error:", error);
     if (error.name === "TokenExpiredError") {
@@ -40,10 +52,11 @@ export const authenticate = async (req, res, next) => {
     if (error.name === "JsonWebTokenError") {
       return errorResponse(res, "Invalid token. Please log in again.", 401);
     }
-    errorResponse(res, "Authentication failed", 401);
+    return errorResponse(res, "Authentication failed", 401);
   }
 };
 
+// Middleware para validar el refresh token
 export const validateRefreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -62,12 +75,17 @@ export const validateRefreshToken = async (req, res, next) => {
       return errorResponse(res, "Invalid refresh token.", 401);
     }
 
-    // Verificar el refresh token con el secreto correspondiente
+    // Verificación del refresh token con el secreto correspondiente
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    // Adjuntar el usuario (ID) decodificado al objeto de la solicitud
+    // Verificar que el ID en el refresh token es un UUID válido
+    if (!uuidv4().test(decoded.id)) {
+      return errorResponse(res, "Invalid user ID in refresh token", 401);
+    }
+
+    // Asignar el ID del usuario al objeto de la solicitud para usarlo en la siguiente operación
     req.userId = decoded.id;
-    next();
+    next(); // Continuar con la siguiente función de middleware o ruta
   } catch (error) {
     console.error("Refresh token validation error:", error);
     if (error.name === "TokenExpiredError") {
