@@ -41,6 +41,14 @@ const validateProfileUpdate = [
     .withMessage("Invalid phone number format")
 ];
 
+const validateEmailOrPassUpdate = [
+  check("email").optional().isEmail().withMessage("Invalid email format"),
+  check("password")
+    .optional()
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters long")
+];
+
 router.post(
   "/register",
   registerRateLimiter,
@@ -75,6 +83,14 @@ router.get("/profile", authenticate, getProfile);
 
 // Nueva ruta para eliminar la cuenta de usuario
 router.delete("/deleteUser", authenticate, deleteUser);
+
+router.put(
+  "/credentials",
+  authenticate,
+  validateEmailOrPassUpdate,
+  handleValidationErrors,
+  updatePassAndEmail
+);
 
 export default router;
 

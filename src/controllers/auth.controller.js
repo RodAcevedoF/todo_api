@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 /**
  * Registro de usuario:
@@ -308,5 +309,42 @@ export const getProfile = async (req, res) => {
   } catch (error) {
     console.error("Error getting profile:", error);
     return errorResponse(res, "Failed to get profile.", 500);
+  }
+};
+
+export const updatePassAndEmail = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validar que haya al menos uno
+    if (!email && !password) {
+      return errorResponse(res, "No valid fields provided for update.", 400);
+    }
+
+    // Validar formato de email si viene
+    if (email && !/\S+@\S+\.\S+/.test(email)) {
+      return errorResponse(res, "Invalid email format.", 400);
+    }
+
+    let updatedUser;
+
+    if (password) {
+      const hashed = await bcrypt.hash(password, 12);
+      if (email) {
+        updatedUser = await User.updatePassAndEmail(req.user.id, hashed, email);
+      } else {
+        updatedUser = await User.update(req.user.id, { password: hashed });
+      }
+    } else if (email) {
+      updatedUser = await User.update(req.user.id, { email });
+    }
+
+    return successResponse(res, {
+      message: "Credentials updated successfully",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("Error updating credentials:", error);
+    return errorResponse(res, "Failed to update credentials.", 500);
   }
 };

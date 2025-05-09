@@ -149,4 +149,13 @@ export default class User {
       client.release();
     }
   }
+
+  static async updatePassAndEmail(id, newPassword, newEmail) {
+    const hashed = await bcrypt.hash(newPassword, 12);
+    const { rows } = await db.query(
+      `UPDATE users SET password = $1, email = $2 WHERE id = $3 RETURNING id`,
+      [hashed, newEmail, id]
+    );
+    return rows[0];
+  }
 }
