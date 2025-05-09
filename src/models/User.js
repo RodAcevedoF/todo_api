@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 export default class User {
   static async create({
