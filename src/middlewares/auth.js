@@ -4,6 +4,9 @@ import User from "../models/User.js";
 import { errorResponse } from "../utils/apiResponse.js";
 import { v4 as uuidv4 } from "uuid";
 
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 // Middleware para autenticación
 export const authenticate = async (req, res, next) => {
   try {
@@ -28,10 +31,6 @@ export const authenticate = async (req, res, next) => {
 
     // Verificación del token JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Expresión regular para validar un UUID v4
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
     // Verificar que el ID en el token es un UUID válido
     if (!uuidRegex.test(decoded.id)) {
