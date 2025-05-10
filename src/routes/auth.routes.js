@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { check } from "express-validator";
 import {
   register,
   login,
@@ -17,41 +16,14 @@ import {
   registerRateLimiter
 } from "../middlewares/rateLimit.js";
 import { handleValidationErrors } from "../middlewares/validation.js";
+import {
+  validateRegister,
+  validateLogin,
+  validateProfileUpdate,
+  validateSensitiveUpdate
+} from "../middlewares/authValidators.js";
 
 const router = Router();
-
-const validateRegister = [
-  check("name").notEmpty().withMessage("Name is required"),
-  check("email").isEmail().withMessage("Invalid email format"),
-  check("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long")
-];
-
-const validateLogin = [
-  check("email").isEmail().withMessage("Invalid email format"),
-  check("password").notEmpty().withMessage("Password is required")
-];
-
-const validateProfileUpdate = [
-  check("name").optional().notEmpty().withMessage("Name cannot be empty"),
-  check("email").optional().isEmail().withMessage("Invalid email format"),
-  check("phone")
-    .optional()
-    .matches(/^\+\d{1,3}\s?\d{4,14}$/)
-    .withMessage("Invalid phone number format")
-];
-
-const validateSensitiveUpdate = [
-  check("currentPassword")
-    .notEmpty()
-    .withMessage("Current password is required"),
-  check("email").optional().isEmail().withMessage("Invalid email format"),
-  check("password")
-    .optional()
-    .isLength({ min: 8 })
-    .withMessage("New password must be at least 8 characters long")
-];
 
 router.post(
   "/register",

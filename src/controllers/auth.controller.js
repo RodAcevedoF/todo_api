@@ -219,6 +219,12 @@ export const updateProfile = async (req, res) => {
       return errorResponse(res, "Invalid email format.", 400);
     }
 
+    for (const key in updates) {
+      if (updates[key] === "") {
+        updates[key] = null;
+      }
+    }
+
     const updatedUser = await User.update(req.user.id, updates);
 
     return successResponse(res, {
