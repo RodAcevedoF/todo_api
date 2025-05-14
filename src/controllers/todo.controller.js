@@ -1,13 +1,7 @@
 import { validationResult } from "express-validator";
 import Todo from "../models/Todo.js";
-import upload from "../config/upload.js";
 import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
-import path from "path";
-import fs from "fs";
-import config from "../config/config.js";
-
-export const uploadFile = upload.single("file");
 
 export const createTodo = async (req, res) => {
   const errors = validationResult(req);
@@ -25,14 +19,12 @@ export const createTodo = async (req, res) => {
       deadline,
       priority,
       checked = false
-    } = req.body;
-    const fileUrl = req.file ? req.file.path : null; // Si no hay archivo, fileUrl será null
+    } = req.body; // Si no hay archivo, fileUrl será null
 
     const newTodo = await Todo.create(req.user.id, {
       title,
       description,
       deadline,
-      fileUrl,
       priority,
       checked
     });
@@ -59,7 +51,6 @@ export const updateTodo = async (req, res) => {
 
   try {
     const updates = req.body;
-    if (req.file) updates.fileUrl = req.file.path; // Si hay archivo, lo asignamos a fileUrl
     if ("checked" in updates) {
       updates.checked = updates.checked === "true" || updates.checked === true;
     }
@@ -86,18 +77,15 @@ export const updateTodo = async (req, res) => {
 
 export const deleteTodo = async (req, res) => {
   try {
-    const { rowCount } = await db.query(
-      "DELETE FROM todos WHERE id = $1 AND user_id = $2",
-      [req.params.id, req.user.id]
-    );
+    const deleted = await Todo.delete(req.params.id, req.user.id);
 
-    if (rowCount === 0) {
+    if (!deleted) {
       return errorResponse(res, "Todo not found", 404);
     }
 
-    successResponse(res, null, 204);
+    return successResponse(res, null, 204);
   } catch (error) {
-    errorResponse(res, error.message, 500);
+    return errorResponse(res, error.message, 500);
   }
 };
 
@@ -114,29 +102,6 @@ export const getTodos = async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message
-    });
-  }
-};
-
-export const getFile = async (req, res) => {
-  try {
-    const filePath = path.join(
-      config.uploadDir || "uploads",
-      req.params.filename
-    );
-
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        error: "File not found"
-      });
-    }
-
-    res.sendFile(filePath);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Error serving file"
     });
   }
 };

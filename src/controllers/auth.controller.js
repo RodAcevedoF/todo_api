@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import db from "../config/db.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import cloudinary from "../config/cloudinary.js";
 
 /**
  * Registro de usuario:
@@ -204,7 +204,8 @@ export const updateProfile = async (req, res) => {
       "birth_date",
       "hobbies",
       "location",
-      "nickname"
+      "nickname",
+      "profile_image_public_id"
     ];
 
     const validUpdates = Object.keys(updates).filter((key) =>
@@ -367,5 +368,38 @@ export const updateSensitiveDataController = async (req, res) => {
         : "Failed to update credentials.",
       error.message === "Incorrect current password" ? 401 : 500
     );
+  }
+};
+
+export const uploadProfileImage = async (req, res) => {
+  try {
+    // Verificamos que el middleware haya asignado ambos datos.
+    if (!req.fileUrl || !req.filePublicId) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No image uploaded" });
+    }
+
+    const userId = req.user.id;
+
+    // Obtenemos el usuario y, si ya tiene una imagen, eliminamos la anterior en Cloudinary.
+    const existingUser = await User.findById(userId);
+    if (existingUser && existingUser.profile_image_public_id) {
+      await cloudinary.uploader.destroy(existingUser.profile_image_public_id);
+    }
+
+    // Actualizamos la imagen de perfil del usuario en la DB utilizando el método del modelo.
+    const updatedUser = await User.updateProfileImage(userId, {
+      url: req.fileUrl,
+      publicId: req.filePublicId
+    });
+
+    return successResponse(res, {
+      message: "Profile image updated",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("Error updating profile image:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
