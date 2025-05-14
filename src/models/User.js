@@ -14,7 +14,8 @@ export default class User {
     birth_date = null,
     hobbies = null,
     location = null,
-    nickname = null
+    nickname = null,
+    profile_image_public_id = null
   }) {
     try {
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -40,9 +41,9 @@ export default class User {
 
       const { rows } = await db.query(
         `INSERT INTO users 
-            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
+            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
         [
           name,
           email,
@@ -55,7 +56,8 @@ export default class User {
           birth_date,
           hobbies,
           location,
-          nickname
+          nickname,
+          profile_image_public_id
         ]
       );
 
@@ -68,7 +70,7 @@ export default class User {
 
   static async findById(id) {
     const { rows } = await db.query(
-      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname 
+      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id 
        FROM users 
        WHERE id = $1`,
       [id]
@@ -102,19 +104,19 @@ export default class User {
       `UPDATE users 
        SET ${setClause} 
        WHERE id = $1 
-       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
+       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
       values
     );
     return rows[0];
   }
 
-  static async updateProfileImage(id, profileImagePath) {
+  static async updateProfileImage(id, { url, publicId }) {
     const { rows } = await db.query(
       `UPDATE users 
-       SET profile_image = $1 
-       WHERE id = $2 
-       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname`,
-      [profileImagePath, id]
+     SET profile_image = $1, profile_image_public_id = $2 
+     WHERE id = $3 
+     RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
+      [url, publicId, id]
     );
     return rows[0];
   }

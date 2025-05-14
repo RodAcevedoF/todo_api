@@ -1,0 +1,638 @@
+openapi: 3.0.0
+info:
+  title: Todo API Documentation
+  version: "1.0.0"
+  description: API para gestionar todos, usuarios, libros y más.
+  contact:
+    name: Rodrigo
+    email: raacevedof@gmail.com
+
+servers:
+  - url: http://localhost:4000/api
+    description: Servidor local de desarrollo
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        completed:
+          type: boolean
+    TodoInput:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registro de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        201:
+          description: Usuario registrado exitosamente
+        400:
+          description: Error de validación
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Inicio de sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Inicio de sesión exitoso con token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+        401:
+          description: Credenciales incorrectas
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Sesión cerrada exitosamente
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refrescar token de acceso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Nuevo token de acceso generado
+        403:
+          description: Token de refresh inválido
+
+  /auth/profile:
+    get:
+      tags: [Auth]
+      summary: Obtener perfil del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+    put:
+      tags: [Auth]
+      summary: Actualizar perfil del usuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: Perfil actualizado exitosamente
+        400:
+          description: Error de validación
+
+  /todos:
+    get:
+      tags: [Todos]
+      summary: Obtener todos del usuario autenticado
+      responses:
+        200:
+          description: Lista de todos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Todo"
+    post:
+      tags: [Todos]
+      summary: Crear un nuevo todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoInput"
+      responses:
+        201:
+          description: Todo creado exitosamente
+
+  /todos/{id}:
+    get:
+      tags: [Todos]
+      summary: Obtener un todo por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Todo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+    put:
+      tags: [Todos]
+      summary: Actualizar un todo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoInput"
+      responses:
+        200:
+          description: Todo actualizado
+    delete:
+      tags: [Todos]
+      summary: Eliminar un todo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Todo eliminado
+
+  /books:
+    post:
+      tags: [Books]
+      summary: Crear un nuevo libro
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                cover_image:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                author:
+                  type: string
+                notes:
+                  type: string
+                isbn:
+                  type: string
+                description:
+                  type: string
+                publisher:
+                  type: string
+                publish_date:
+                  type: string
+                  format: date
+                pages:
+                  type: integer
+                checked:
+                  type: boolean
+      responses:
+        201:
+          description: Libro creado exitosamente
+        400:
+          description: Error de validación
+
+    get:
+      tags: [Books]
+      summary: Obtener lista de libros
+      responses:
+        200:
+          description: Lista de libros disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    author:
+                      type: string
+                    cover_image:
+                      type: string
+                      format: uri
+
+  /books/{id}:
+    delete:
+      tags: [Books]
+      summary: Eliminar un libro
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Libro eliminado exitosamente
+        404:
+          description: Libro no encontrado
+
+    patch:
+      tags: [Books]
+      summary: Actualizar un libro
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                cover_image:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                author:
+                  type: string
+                notes:
+                  type: string
+                isbn:
+                  type: string
+                description:
+                  type: string
+                publisher:
+                  type: string
+                publish_date:
+                  type: string
+                  format: date
+                pages:
+                  type: integer
+                checked:
+                  type: boolean
+      responses:
+        200:
+          description: Libro actualizado exitosamente
+        400:
+          description: Error de validación
+
+  /videos:
+    post:
+      tags: [Videos]
+      summary: Crear un nuevo video
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video_id:
+                  type: string
+                  description: ID del video
+                title:
+                  type: string
+                  description: Título del video
+                channel:
+                  type: string
+                  description: Canal de origen del video
+                channelId:
+                  type: string
+                  description: ID del canal (opcional)
+                notes:
+                  type: string
+                  description: Notas sobre el video (opcional)
+                description:
+                  type: string
+                  description: Descripción del video (opcional)
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Fecha de creación del video (opcional)
+                views:
+                  type: integer
+                  minimum: 0
+                  description: Número de vistas (opcional)
+                duration_seconds:
+                  type: integer
+                  minimum: 0
+                  description: Duración del video en segundos (opcional)
+                checked:
+                  type: boolean
+                  description: Estado de revisión del video (opcional)
+                thumbnail:
+                  type: string
+                  format: binary
+                  description: Imagen en miniatura del video (opcional)
+      responses:
+        201:
+          description: Video creado exitosamente
+        400:
+          description: Error de validación
+
+    get:
+      tags: [Videos]
+      summary: Obtener lista de videos
+      responses:
+        200:
+          description: Lista de videos disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    video_id:
+                      type: string
+                    title:
+                      type: string
+                    channel:
+                      type: string
+                    thumbnail:
+                      type: string
+                      format: uri
+
+  /videos/{id}:
+    delete:
+      tags: [Videos]
+      summary: Eliminar un video
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Video eliminado exitosamente
+        404:
+          description: Video no encontrado
+
+    patch:
+      tags: [Videos]
+      summary: Actualizar un video
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Título del video (opcional)
+                channel:
+                  type: string
+                  description: Canal del video (opcional)
+                channelId:
+                  type: string
+                  description: ID del canal (opcional)
+                notes:
+                  type: string
+                  description: Notas sobre el video (opcional)
+                description:
+                  type: string
+                  description: Descripción del video (opcional)
+                created_at:
+                  type: string
+                  format: date-time
+                  description: Fecha de creación del video (opcional)
+                views:
+                  type: integer
+                  minimum: 0
+                  description: Número de vistas (opcional)
+                duration_seconds:
+                  type: integer
+                  minimum: 0
+                  description: Duración del video en segundos (opcional)
+                checked:
+                  type: boolean
+                  description: Estado de revisión del video (opcional)
+                thumbnail:
+                  type: string
+                  format: binary
+                  description: Imagen en miniatura (opcional)
+      responses:
+        200:
+          description: Video actualizado exitosamente
+        400:
+          description: Error de validación
+        404:
+          description: Video no encontrado
+
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Obtener información del dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Información del dashboard obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  todos:
+                    type: integer
+                    description: Número total de "todos" del usuario
+                  books:
+                    type: integer
+                    description: Número total de libros del usuario
+                  videos:
+                    type: integer
+                    description: Número total de videos del usuario
+                  connection_time:
+                    type: string
+                    format: date-time
+                    description: Tiempo de conexión del usuario
+        401:
+          description: No autorizado, se requiere autenticación
+
+  /categories:
+    post:
+      tags: [Categories]
+      summary: Crear una nueva categoría
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nombre de la categoría
+      responses:
+        201:
+          description: Categoría creada exitosamente
+        400:
+          description: Error de validación
+
+    get:
+      tags: [Categories]
+      summary: Obtener todas las categorías
+      responses:
+        200:
+          description: Lista de categorías disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+
+  /categories/books/{bookId}:
+    post:
+      tags: [Categories]
+      summary: Asociar categorías a un libro
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categories:
+                  type: array
+                  items:
+                    type: string
+                  description: Lista de categorías a asociar con el libro
+      responses:
+        200:
+          description: Categorías asociadas al libro exitosamente
+        400:
+          description: Error de validación
+        404:
+          description: Libro no encontrado
