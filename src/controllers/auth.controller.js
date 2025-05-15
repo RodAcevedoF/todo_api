@@ -43,7 +43,8 @@ export const login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        nickname: user.nickname
+        nickname: user.nickname,
+        is_verified: user.is_verified
       },
       accessToken,
       refreshToken
