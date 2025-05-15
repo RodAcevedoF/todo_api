@@ -3,6 +3,8 @@ import cors from "cors";
 import config from "./src/config/config.js";
 import db from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
+import verificationRoutes from "./src/routes/verification.routes.js";
 import todoRoutes from "./src/routes/todo.routes.js";
 import bookRoutes from "./src/routes/book.routes.js";
 import categoryRoutes from "./src/routes/category.routes.js";
@@ -95,14 +97,14 @@ app.get("/health", (req, res) => {
 });
 
 // Rutas protegidas y funcionales
-app.use("/api/auth/register", registerRateLimiter, authRoutes); // Registro con rate limit
-app.use("/api/auth/login", loginRateLimiter, authRoutes); // Login con rate limit
-app.use("/api/auth", authRoutes); // Todas las demás rutas de autenticación
-app.use("/api/todos", todoRoutes); // Rutas de tareas
-app.use("/api/books", bookRoutes); // Rutas de libros
-app.use("/api/videos", videoRoutes); // Rutas de videos
-app.use("/api/categories", categoryRoutes); // Rutas de categorías
-app.use("/api/dashboard", dashboardRoutes); // Ruta de dashboard
+app.use("/api/auth", authRoutes); // login, logout, refresh
+app.use("/api/user", userRoutes); // register, profile, credentials, image
+app.use("/api/security", verificationRoutes); // email verify & password reset
+app.use("/api/todos", todoRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/videos", videoRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Manejo de errores en rutas inexistentes
 app.use((req, res, next) => {
