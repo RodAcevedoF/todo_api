@@ -15,7 +15,8 @@ export default class User {
     hobbies = null,
     location = null,
     nickname = null,
-    profile_image_public_id = null
+    profile_image_public_id = null,
+    is_verified = false
   }) {
     try {
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -41,9 +42,9 @@ export default class User {
 
       const { rows } = await db.query(
         `INSERT INTO users 
-            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
-            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
+            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified`,
         [
           name,
           email,
@@ -57,7 +58,8 @@ export default class User {
           hobbies,
           location,
           nickname,
-          profile_image_public_id
+          profile_image_public_id,
+          is_verified
         ]
       );
 
@@ -157,24 +159,30 @@ export default class User {
     currentPassword,
     { newEmail, newPassword }
   ) {
-    // Buscar al usuario completo (incluyendo contraseña hasheada)
     const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [id]);
     const user = rows[0];
     if (!user) throw new Error("User not found");
 
-    // Verificar contraseña actual
-    const passwordMatches = await this.comparePassword(
-      currentPassword,
-      user.password
-    );
-    if (!passwordMatches) throw new Error("Incorrect current password");
+    // Solo verificar si se pasó currentPassword
+    if (currentPassword) {
+      const isMatch = await this.comparePassword(
+        currentPassword,
+        user.password
+      );
+      if (!isMatch) {
+        throw new Error("Incorrect current password");
+      }
+    }
 
-    // Preparar actualizaciones
     const updates = {};
-    if (newEmail) updates.email = newEmail;
+
+    if (newEmail) updates.email = newEmail.trim().toLowerCase(); // Normalización mínima
     if (newPassword) updates.password = await bcrypt.hash(newPassword, 12);
 
-    // Aplicar actualización
+    if (!Object.keys(updates).length) {
+      throw new Error("No data to update");
+    }
+
     return await this.update(id, updates);
   }
 }

@@ -1,0 +1,54 @@
+import crypto from "crypto";
+import Token from "../models/Token.js";
+import User from "../models/User.js";
+import { successResponse, errorResponse } from "../utils/apiResponse.js";
+
+// ✅ Paso 1: crear token y devolverlo al frontend para que lo envíe con EmailJS
+export const requestEmailVerification = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+
+    await Token.createEmailVerification(userId, token, expiresAt);
+
+    // El frontend usa esto para incluir el token en el email
+    return successResponse(res, {
+      message: "Verification token generated.",
+      token
+    });
+  } catch (error) {
+    console.error("Error generating verification token:", error);
+    return errorResponse(res, "Failed to generate verification token.", 500);
+  }
+};
+
+// ✅ Paso 2: validar el token cuando el usuario entra al link
+export const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token)
+      return errorResponse(res, "Verification token is required.", 400);
+
+    const record = await Token.findEmailVerificationByToken(token);
+
+    if (!record || record.expires_at < new Date()) {
+      return errorResponse(res, "Token is invalid or expired.", 400);
+    }
+
+    const user = await User.findById(record.user_id);
+    if (user?.is_verified) {
+      return successResponse(res, "Email already verified.");
+    }
+
+    await User.update(record.user_id, { is_verified: true });
+    await Token.deleteEmailVerification(record.user_id); //Invalida multiples entradas
+
+    return successResponse(res, "Email verified successfully.");
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    return errorResponse(res, "Failed to verify email.", 500);
+  }
+};
