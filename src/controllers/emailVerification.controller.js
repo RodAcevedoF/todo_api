@@ -29,30 +29,30 @@ export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
 
-    if (!token)
-      return errorResponse(res, "Verification token is required.", 400);
+    if (!token) {
+      return res.redirect(`${process.env.FRONTEND_URL}/verify?status=invalid`);
+    }
 
     const record = await Token.findEmailVerificationByToken(token);
 
-    /* if (!record || record.expires_at < new Date()) {
-      return errorResponse(res, "Token is invalid or expired.", 400);
-    } */
-
     if (!record || record.expires_at < new Date()) {
-      return res.redirect(`${process.env.FRONTEND_URL}/verify?token=invalid`);
+      return res.redirect(`${process.env.FRONTEND_URL}/verify?status=invalid`);
     }
 
     const user = await User.findById(record.user_id);
+
     if (user?.is_verified) {
-      return res.redirect(`${process.env.FRONTEND_URL}/verify?token=${token}`);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/verify?status=already_verified`
+      );
     }
 
     await User.update(record.user_id, { is_verified: true });
-    await Token.deleteEmailVerification(record.user_id); //Invalida multiples entradas
+    await Token.deleteEmailVerification(record.user_id);
 
-    return res.redirect(`${process.env.FRONTEND_URL}/verify?token=${token}`);
+    return res.redirect(`${process.env.FRONTEND_URL}/verify?status=success`);
   } catch (error) {
     console.error("Error verifying email:", error);
-    return errorResponse(res, "Failed to verify email.", 500);
+    return res.redirect(`${process.env.FRONTEND_URL}/verify?status=invalid`);
   }
 };
