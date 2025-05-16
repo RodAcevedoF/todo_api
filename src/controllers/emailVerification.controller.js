@@ -7,6 +7,7 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 export const requestEmailVerification = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log("🔐 req.user:", req.user);
 
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
