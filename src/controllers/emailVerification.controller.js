@@ -24,7 +24,6 @@ export const requestEmailVerification = async (req, res) => {
   }
 };
 
-// ✅ Paso 2: validar el token cuando el usuario entra al link
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -39,14 +38,7 @@ export const verifyEmail = async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/verify?status=invalid`);
     }
 
-    const user = await User.findById(record.user_id);
-
-    if (user?.is_verified) {
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/verify?status=already_verified`
-      );
-    }
-
+    // ✔️ No importa si ya estaba verificado, lo tratamos como success igual
     await User.update(record.user_id, { is_verified: true });
     await Token.deleteEmailVerification(record.user_id);
 
