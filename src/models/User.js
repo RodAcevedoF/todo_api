@@ -72,7 +72,7 @@ export default class User {
 
   static async findById(id) {
     const { rows } = await db.query(
-      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id 
+      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified 
        FROM users 
        WHERE id = $1`,
       [id]
