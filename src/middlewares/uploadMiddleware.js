@@ -3,7 +3,7 @@ import multer from "multer";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
 export const uploadMiddleware = async (req, res, next) => {
-  const uploader = upload.single("file");
+  const uploader = upload.single("profileImage");
 
   uploader(req, res, async (err) => {
     if (err instanceof multer.MulterError) {
