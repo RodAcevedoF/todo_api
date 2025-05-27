@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import Token from "../models/Token.js";
-import { normalizeUserUpdates } from "../utils/normalizeUserUpdates.js";
+import { normalizeUserUpdate } from "../utils/normalizeUserUpdates.js";
 
 export const register = async (req, res) => {
   const errors = validationResult(req);
@@ -91,7 +91,7 @@ export const updateProfile = async (req, res) => {
       return errorResponse(res, "No valid fields provided for update.", 400);
     }
 
-    const sanitizedUpdates = normalizeUserUpdates(updates);
+    const sanitizedUpdates = normalizeUserUpdate(updates);
 
     const updatedUser = await User.update(req.user.id, sanitizedUpdates);
 
