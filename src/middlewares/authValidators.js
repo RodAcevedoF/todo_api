@@ -22,16 +22,25 @@ export const validateProfileUpdate = [
     .withMessage("Invalid phone number format"),
   check("nickname").optional(),
   check("description").optional(),
-  check("website").optional().isURL().withMessage("Invalid website URL"),
-  check("github_url").optional().isURL().withMessage("Invalid Github URL"),
+  check("website")
+    .optional({ nullable: true })
+    .isURL({ require_protocol: true })
+    .withMessage("Invalid website URL"),
+  check("github_url")
+    .optional({ nullable: true })
+    .isURL({ require_protocol: true })
+    .withMessage("Invalid Github URL"),
   check("birth_date").optional().isISO8601().withMessage("Invalid date format"),
   check("hobbies").optional(),
   check("location").optional(),
   check("instagram_url")
-    .optional()
-    .isURL()
+    .optional({ nullable: true })
+    .isURL({ require_protocol: true })
     .withMessage("Invalid Instagram URL"),
-  check("linkedin_url").optional().isURL().withMessage("Invalid Linkedin URL")
+  check("linkedin_url")
+    .optional({ nullable: true })
+    .isURL({ require_protocol: true })
+    .withMessage("Invalid Linkedin URL")
 ];
 
 export const validateSensitiveUpdate = [
