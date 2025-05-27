@@ -1,4 +1,4 @@
-import { isValidUrl } from "./isValidUrl";
+import { isValidUrl } from "./isValidUrl.js";
 
 export const normalizeUserUpdate = (updates) => {
   const cleaned = {};
