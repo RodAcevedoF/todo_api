@@ -4,6 +4,7 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import Token from "../models/Token.js";
+import { normalizeUserUpdates } from "../utils/normalizeUserUpdates.js";
 
 export const register = async (req, res) => {
   const errors = validationResult(req);
@@ -77,7 +78,9 @@ export const updateProfile = async (req, res) => {
       "location",
       "nickname",
       "profile_image_public_id",
-      "is_verified"
+      "is_verified",
+      "linkedin_url",
+      "instagram_url"
     ];
 
     const validUpdates = Object.keys(updates).filter((key) =>
@@ -88,17 +91,9 @@ export const updateProfile = async (req, res) => {
       return errorResponse(res, "No valid fields provided for update.", 400);
     }
 
-    if (updates.email && !/\S+@\S+\.\S+/.test(updates.email)) {
-      return errorResponse(res, "Invalid email format.", 400);
-    }
+    const sanitizedUpdates = normalizeUserUpdates(updates);
 
-    for (const key in updates) {
-      if (updates[key] === "") {
-        updates[key] = null;
-      }
-    }
-
-    const updatedUser = await User.update(req.user.id, updates);
+    const updatedUser = await User.update(req.user.id, sanitizedUpdates);
 
     return successResponse(res, {
       message: "Profile updated successfully",
@@ -106,7 +101,11 @@ export const updateProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating profile:", error);
-    return errorResponse(res, "Failed to update profile.", 500);
+    return errorResponse(
+      res,
+      error.message || "Failed to update profile.",
+      500
+    );
   }
 };
 

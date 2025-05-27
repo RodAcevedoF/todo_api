@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../config/db.js";
+
 export default class User {
   static async create({
     name,
@@ -16,7 +17,9 @@ export default class User {
     location = null,
     nickname = null,
     profile_image_public_id = null,
-    is_verified = false
+    is_verified = false,
+    linkedin_url = null,
+    instagram_url = null
   }) {
     try {
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -42,9 +45,9 @@ export default class User {
 
       const { rows } = await db.query(
         `INSERT INTO users 
-            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
-            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified`,
+            (name, email, password, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified, linkedin_url, instagram_url) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+            RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified, linkedin_url, instagram_url`,
         [
           name,
           email,
@@ -59,7 +62,9 @@ export default class User {
           location,
           nickname,
           profile_image_public_id,
-          is_verified
+          is_verified,
+          linkedin_url,
+          instagram_url
         ]
       );
 
@@ -72,7 +77,7 @@ export default class User {
 
   static async findById(id) {
     const { rows } = await db.query(
-      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified 
+      `SELECT id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, is_verified, linkedin_url, instagram_url 
        FROM users 
        WHERE id = $1`,
       [id]
@@ -106,7 +111,7 @@ export default class User {
       `UPDATE users 
        SET ${setClause} 
        WHERE id = $1 
-       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
+       RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, linkedin_url, instagram_url`,
       values
     );
     return rows[0];
@@ -117,7 +122,7 @@ export default class User {
       `UPDATE users 
      SET profile_image = $1, profile_image_public_id = $2 
      WHERE id = $3 
-     RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id`,
+     RETURNING id, name, email, description, profile_image, phone, website, github_url, birth_date, hobbies, location, nickname, profile_image_public_id, linkedin_url, instagram_url`,
       [url, publicId, id]
     );
     return rows[0];
