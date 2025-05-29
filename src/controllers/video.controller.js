@@ -15,8 +15,6 @@ export const createVideo = async (req, res) => {
     req.body.channelId = req.body.channelid;
   }
 
-  console.log("Datos recibidos en createVideo:", req.body);
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
@@ -28,14 +26,6 @@ export const createVideo = async (req, res) => {
 
   try {
     const { thumbnail, description, created_at, ...videoData } = req.body;
-
-    console.log("Datos enviados al modelo:", {
-      video_id: req.body.video_id,
-      ...videoData,
-      description: description || null,
-      created_at: created_at ? new Date(created_at) : new Date(),
-      thumbnail: req.file ? req.file.filename : thumbnail || null
-    });
 
     const video = await Video.create(req.user.id, {
       video_id: req.body.video_id,
