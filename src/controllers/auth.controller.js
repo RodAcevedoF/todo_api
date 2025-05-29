@@ -78,41 +78,6 @@ export const logout = async (req, res) => {
     return errorResponse(res, "Failed to log out.", 500);
   }
 };
-/* 
-export const refreshAccessToken = async (req, res) => {
-  try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res
-        .status(401)
-        .json({ success: false, error: "Refresh token is missing" });
-    }
-
-    if (typeof refreshToken !== "string") {
-      return errorResponse(res, "Refresh token must be a string.", 400);
-    }
-
-    const tokenRecord = await Token.findRefreshToken(refreshToken);
-    if (!tokenRecord) {
-      return res
-        .status(401)
-        .json({ success: false, error: "Invalid refresh token" });
-    }
-
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, {
-      expiresIn: "15m"
-    });
-
-    return res.status(200).json({ success: true, accessToken });
-  } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return errorResponse(res, "Refresh token expired.", 401);
-    }
-    return errorResponse(res, "Invalid refresh token.", 401);
-  }
-}; */
 
 export const refreshAccessToken = async (req, res) => {
   try {

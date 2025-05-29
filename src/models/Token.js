@@ -7,24 +7,6 @@ const Token = {
     await db.query("DELETE FROM refresh_tokens WHERE user_id = $1", [userId]);
   },
 
-  /* saveRefreshToken: async (token, userId) => {
-    await db.query(
-      "INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)",
-      [token, userId]
-    );
-  },
-
-  findRefreshToken: async (token) => {
-    const { rows } = await db.query(
-      "SELECT * FROM refresh_tokens WHERE token = $1",
-      [token]
-    );
-    return rows[0];
-  },
-
-  deleteRefreshToken: async (token) => {
-    await db.query("DELETE FROM refresh_tokens WHERE token = $1", [token]);
-  } */
   saveRefreshToken: async (token, userId) => {
     const hashed = hashToken(token);
     await db.query(
