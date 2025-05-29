@@ -78,7 +78,7 @@ export const logout = async (req, res) => {
     return errorResponse(res, "Failed to log out.", 500);
   }
 };
-
+/* 
 export const refreshAccessToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
@@ -106,6 +106,52 @@ export const refreshAccessToken = async (req, res) => {
     });
 
     return res.status(200).json({ success: true, accessToken });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return errorResponse(res, "Refresh token expired.", 401);
+    }
+    return errorResponse(res, "Invalid refresh token.", 401);
+  }
+}; */
+
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken || typeof refreshToken !== "string") {
+      return errorResponse(res, "Refresh token is missing or invalid.", 400);
+    }
+
+    const tokenRecord = await Token.findRefreshToken(refreshToken);
+    if (!tokenRecord) {
+      return errorResponse(res, "Invalid refresh token.", 401);
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const userId = decoded.id;
+
+    const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+      expiresIn: "15m"
+    });
+
+    // 🔁 Generar nuevo refreshToken
+    const newRefreshToken = jwt.sign(
+      { id: userId },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "7d" }
+    );
+
+    // 🔁 Reemplazar el viejo token en la base
+    await Token.deleteRefreshToken(refreshToken);
+    await Token.saveRefreshToken(newRefreshToken, userId);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        accessToken,
+        refreshToken: newRefreshToken // 👈 clave
+      }
+    });
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       return errorResponse(res, "Refresh token expired.", 401);
