@@ -4,10 +4,7 @@ import {
   logout,
   refreshAccessToken
 } from "../controllers/auth.controller.js";
-import {
-  loginRateLimiter,
-  registerRateLimiter
-} from "../middlewares/rateLimit.js";
+import { loginRateLimiter } from "../middlewares/rateLimit.js";
 import { validateLogin } from "../middlewares/authValidators.js";
 import { handleValidationErrors } from "../middlewares/validation.js";
 import { authenticate, validateRefreshToken } from "../middlewares/auth.js";
