@@ -96,7 +96,7 @@ export const refreshAccessToken = async (req, res) => {
     const userId = decoded.id;
 
     const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-      expiresIn: "3m"
+      expiresIn: "2m"
     });
 
     // 🔁 Generar nuevo refreshToken
@@ -109,7 +109,7 @@ export const refreshAccessToken = async (req, res) => {
     // 🔁 Reemplazar el viejo token en la base
     await Token.deleteRefreshToken(refreshToken);
     await Token.saveRefreshToken(newRefreshToken, userId);
-    console.log("Nuevo refresh token guardado correctamente.");
+    console.log("New refresh token saved successfully");
 
     return res.status(200).json({
       success: true,

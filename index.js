@@ -17,10 +17,6 @@ import "./src/config/validateEnv.js"; // Validación de variables de entorno
 import logger from "./src/config/logger.js"; // Logger personalizado
 import compression from "compression"; // Middleware para compresión de respuestas
 import helmet from "helmet"; // Middleware de seguridad HTTP
-import {
-  loginRateLimiter,
-  registerRateLimiter
-} from "./src/middlewares/rateLimit.js"; // Rate limiting
 
 const app = express();
 app.set("trust proxy", "loopback"); // Solo confía en proxies locales (127.0.0.1)
@@ -43,7 +39,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true,
+    credentials: false,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
   })
