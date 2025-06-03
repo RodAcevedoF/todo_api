@@ -82,24 +82,18 @@ export const logout = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
+    const userId = req.userId; // viene del middleware
 
     if (!refreshToken || typeof refreshToken !== "string") {
       return errorResponse(res, "Refresh token is missing or invalid.", 400);
     }
 
-    const tokenRecord = await Token.findRefreshToken(refreshToken);
-    if (!tokenRecord) {
-      return errorResponse(res, "Invalid refresh token.", 401);
-    }
-
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const userId = decoded.id;
+    // ⚠️ Ya no hace falta buscarlo de nuevo en la DB ni hacer jwt.verify()
 
     const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
       expiresIn: "2m"
     });
 
-    // 🔁 Generar nuevo refreshToken
     const newRefreshToken = jwt.sign(
       { id: userId },
       process.env.JWT_REFRESH_SECRET,
@@ -107,20 +101,18 @@ export const refreshAccessToken = async (req, res) => {
     );
 
     // 🔁 Reemplazar el viejo token en la base
-    await Token.deleteRefreshToken(refreshToken);
+    await Token.deleteRefreshToken(refreshToken); // importante: hashealo adentro del método
     await Token.saveRefreshToken(newRefreshToken, userId);
 
     return res.status(200).json({
       success: true,
       data: {
         accessToken,
-        refreshToken: newRefreshToken // 👈 clave
+        refreshToken: newRefreshToken
       }
     });
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return errorResponse(res, "Refresh token expired.", 401);
-    }
-    return errorResponse(res, "Invalid refresh token.", 401);
+    console.error("Error al refrescar token:", err);
+    return errorResponse(res, "Failed to refresh token.", 500);
   }
 };

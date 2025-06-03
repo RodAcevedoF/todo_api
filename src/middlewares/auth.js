@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 import User from "../models/User.js";
 import { errorResponse } from "../utils/apiResponse.js";
+import { hashToken } from "../utils/hashToken.js";
 
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -63,33 +64,31 @@ export const validateRefreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return errorResponse(res, "Refresh token is missing.", 401);
+    if (!refreshToken || typeof refreshToken !== "string") {
+      return errorResponse(res, "Refresh token is missing or invalid.", 401);
     }
 
-    // Verificar si el refresh token existe en la base de datos
-    const { rows } = await db.query(
-      "SELECT token FROM refresh_tokens WHERE token = $1",
-      [refreshToken]
-    );
-
-    if (rows.length === 0) {
+    // Buscar token hasheado en DB
+    const tokenRecord = await Token.findRefreshToken(refreshToken);
+    if (!tokenRecord) {
       return errorResponse(res, "Invalid refresh token.", 401);
     }
 
-    // Verificación del refresh token con el secreto correspondiente
+    // Verificar firma del JWT
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    // Verificar que el ID en el refresh token es un UUID válido
     if (!uuidRegex.test(decoded.id)) {
       return errorResponse(res, "Invalid user ID in refresh token", 401);
     }
 
-    // Asignar el ID del usuario al objeto de la solicitud para usarlo en la siguiente operación
+    // Log (solo si querés en desarrollo)
+    console.log("✅ Refresh token válido para userId:", decoded.id);
+
     req.userId = decoded.id;
-    next(); // Continuar con la siguiente función de middleware o ruta
+    next();
   } catch (error) {
     console.error("Refresh token validation error:", error);
+
     if (error.name === "TokenExpiredError") {
       return errorResponse(
         res,
@@ -97,9 +96,11 @@ export const validateRefreshToken = async (req, res, next) => {
         401
       );
     }
+
     if (error.name === "JsonWebTokenError") {
       return errorResponse(res, "Invalid refresh token.", 401);
     }
+
     return errorResponse(res, "Failed to validate refresh token.", 500);
   }
 };
