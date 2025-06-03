@@ -88,20 +88,17 @@ export const refreshAccessToken = async (req, res) => {
       return errorResponse(res, "Refresh token is missing or invalid.", 400);
     }
 
-    // ⚠️ Ya no hace falta buscarlo de nuevo en la DB ni hacer jwt.verify()
-
     const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-      expiresIn: "1m"
+      expiresIn: "15m"
     });
 
     const newRefreshToken = jwt.sign(
       { id: userId },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "2m" }
+      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "7d" }
     );
 
-    // 🔁 Reemplazar el viejo token en la base
-    await Token.deleteRefreshToken(refreshToken); // importante: hashealo adentro del método
+    await Token.deleteRefreshToken(refreshToken);
     await Token.saveRefreshToken(newRefreshToken, userId);
 
     return res.status(200).json({

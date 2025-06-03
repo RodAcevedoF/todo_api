@@ -16,7 +16,6 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, "Authentication token missing", 401);
     }
 
-    // Verificar si el token está en la lista negra
     const { rows } = await db.query(
       "SELECT 1 FROM blacklisted_tokens WHERE token = $1",
       [token]
@@ -29,24 +28,20 @@ export const authenticate = async (req, res, next) => {
       );
     }
 
-    // Verificación del token JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Verificar que el ID en el token es un UUID válido
     if (!uuidRegex.test(decoded.id)) {
       return errorResponse(res, "Invalid user ID in token", 401);
     }
 
-    // Obtener el usuario asociado al ID decodificado
     const user = await User.findById(decoded.id);
 
     if (!user) {
       return errorResponse(res, "Invalid or expired token", 401);
     }
 
-    // Asignar el usuario al objeto `req.user`
     req.user = user;
-    next(); // Continuar con la siguiente función de middleware o ruta
+    next();
   } catch (error) {
     console.error("Authentication error:", error);
     if (error.name === "TokenExpiredError") {
@@ -59,7 +54,6 @@ export const authenticate = async (req, res, next) => {
   }
 };
 
-// Middleware para validar el refresh token
 export const validateRefreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -68,21 +62,16 @@ export const validateRefreshToken = async (req, res, next) => {
       return errorResponse(res, "Refresh token is missing or invalid.", 401);
     }
 
-    // Buscar token hasheado en DB
     const tokenRecord = await Token.findRefreshToken(refreshToken);
     if (!tokenRecord) {
       return errorResponse(res, "Invalid refresh token.", 401);
     }
 
-    // Verificar firma del JWT
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     if (!uuidRegex.test(decoded.id)) {
       return errorResponse(res, "Invalid user ID in refresh token", 401);
     }
-
-    // Log (solo si querés en desarrollo)
-    console.log("✅ Refresh token válido para userId:", decoded.id);
 
     req.userId = decoded.id;
     next();
@@ -100,7 +89,6 @@ export const validateRefreshToken = async (req, res, next) => {
     if (error.name === "JsonWebTokenError") {
       return errorResponse(res, "Invalid refresh token.", 401);
     }
-
     return errorResponse(res, "Failed to validate refresh token.", 500);
   }
 };
