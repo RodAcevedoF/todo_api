@@ -109,7 +109,6 @@ export const refreshAccessToken = async (req, res) => {
     // 🔁 Reemplazar el viejo token en la base
     await Token.deleteRefreshToken(refreshToken);
     await Token.saveRefreshToken(newRefreshToken, userId);
-    console.log("New refresh token saved successfully");
 
     return res.status(200).json({
       success: true,

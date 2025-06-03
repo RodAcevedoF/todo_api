@@ -7,8 +7,16 @@ const Token = {
     await db.query("DELETE FROM refresh_tokens WHERE user_id = $1", [userId]);
   },
 
+  /*   saveRefreshToken: async (token, userId) => {
+    const hashed = hashToken(token);
+    await db.query(
+      "INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)",
+      [hashed, userId]
+    );
+  }, */
   saveRefreshToken: async (token, userId) => {
     const hashed = hashToken(token);
+    console.log("💾 Guardando refresh token hash:", hashed);
     await db.query(
       "INSERT INTO refresh_tokens (token, user_id) VALUES ($1, $2)",
       [hashed, userId]
@@ -17,12 +25,22 @@ const Token = {
 
   findRefreshToken: async (token) => {
     const hashed = hashToken(token);
+    console.log("🔍 Buscando hash:", hashed);
     const { rows } = await db.query(
       "SELECT * FROM refresh_tokens WHERE token = $1",
       [hashed]
     );
     return rows[0];
   },
+  /* 
+  findRefreshToken: async (token) => {
+    const hashed = hashToken(token);
+    const { rows } = await db.query(
+      "SELECT * FROM refresh_tokens WHERE token = $1",
+      [hashed]
+    );
+    return rows[0];
+  }, */
 
   deleteRefreshToken: async (token) => {
     const hashed = hashToken(token);
