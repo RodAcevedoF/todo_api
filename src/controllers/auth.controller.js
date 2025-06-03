@@ -91,13 +91,13 @@ export const refreshAccessToken = async (req, res) => {
     // ⚠️ Ya no hace falta buscarlo de nuevo en la DB ni hacer jwt.verify()
 
     const accessToken = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-      expiresIn: "2m"
+      expiresIn: "1m"
     });
 
     const newRefreshToken = jwt.sign(
       { id: userId },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "7d" }
+      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "2m" }
     );
 
     // 🔁 Reemplazar el viejo token en la base
