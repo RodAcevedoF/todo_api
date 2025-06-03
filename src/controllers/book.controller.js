@@ -41,7 +41,7 @@ export const createBook = async (req, res) => {
 
     const book = await Book.create(req.user.id, {
       ...bookData,
-      pages: typeof pages === "number" ? pages : null, // Incluimos el número de páginas
+      pages: isNaN(Number(pages)) ? null : Number(pages), // Incluimos el número de páginas
       cover_image: cover_image || null,
       isbn: isbn || null,
       description: description || null,
@@ -126,7 +126,10 @@ export const updateBook = async (req, res) => {
       parsedCategories = [];
     }
 
-    if (pages !== undefined) bookData.pages = pages; // Incluimos `pages` si está presente
+    if (pages !== undefined) {
+      const parsedPages = Number(pages);
+      bookData.pages = isNaN(parsedPages) ? null : parsedPages;
+    }
     if (description) bookData.description = description;
     if (publisher) bookData.publisher = publisher;
     if (checked !== undefined) bookData.checked = checked;
