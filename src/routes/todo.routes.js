@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.js";
+import { requireVerifiedUser } from "../middlewares/requireVerifiedUser.js";
 import {
   createTodo,
   getTodos,
@@ -15,6 +16,7 @@ import { handleValidationErrors } from "../middlewares/validation.js";
 const router = Router();
 
 router.use(authenticate);
+router.use(requireVerifiedUser);
 
 router.post("/", validateCreateTodo, handleValidationErrors, createTodo);
 router.get("/", getTodos);

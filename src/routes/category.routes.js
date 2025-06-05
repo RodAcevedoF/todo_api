@@ -1,31 +1,23 @@
 import { Router } from "express";
-import { check } from "express-validator";
 import { authenticate } from "../middlewares/auth.js";
+import { requireVerifiedUser } from "../middlewares/requireVerifiedUser.js";
 import {
   createCategory,
   getCategories,
   addCategoriesToBook
 } from "../controllers/category.controller.js";
+import {
+  categoryCreateValidator,
+  categoryToBookValidator
+} from "../middlewares/categoryValidators.js";
 
 const router = Router();
 
 router.use(authenticate);
+router.use(requireVerifiedUser);
 
-// Ruta para crear una categoría
-router.post(
-  "/",
-  [check("name").notEmpty().withMessage("Category name is required")],
-  createCategory
-);
-
-// Ruta para obtener todas las categorías
+router.post("/", categoryCreateValidator, createCategory);
 router.get("/", getCategories);
-
-// Ruta para asociar categorías con un libro
-router.post(
-  "/books/:bookId",
-  [check("categories").isArray().withMessage("Categories must be an array")],
-  addCategoriesToBook
-);
+router.post("/books/:bookId", categoryToBookValidator, addCategoriesToBook);
 
 export default router;

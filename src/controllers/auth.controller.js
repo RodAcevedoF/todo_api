@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import Token from "../models/Token.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
-export const login = async (req, res) => {
+/* export const login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
@@ -38,6 +38,49 @@ export const login = async (req, res) => {
     await Token.saveRefreshToken(refreshToken, user.id);
     await User.updateLastLogin(user.id);
 
+    return successResponse(res, {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        nickname: user.nickname,
+        is_verified: user.is_verified
+      },
+      accessToken,
+      refreshToken
+    });
+  } catch (error) {
+    console.error("Error during login:", error);
+    return errorResponse(res, "Failed to log in. Please try again.", 500);
+  }
+}; */
+export const login = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(
+      res,
+      errors.array().map((err) => err.msg),
+      400
+    );
+  }
+  try {
+    const { email, password } = req.body;
+    const sanitizedEmail = email.trim().toLowerCase();
+    const user = await User.findByEmail(sanitizedEmail);
+
+    if (!user || !(await User.comparePassword(password, user.password))) {
+      return errorResponse(res, "Invalid email or password.", 401);
+    }
+
+    const accessToken = User.generateToken(user);
+    const refreshToken = jwt.sign(
+      { id: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES || "7d" }
+    );
+    await Token.deleteRefreshTokensByUserId(user.id);
+    await Token.saveRefreshToken(refreshToken, user.id);
+    await User.updateLastLogin(user.id);
     return successResponse(res, {
       user: {
         id: user.id,
