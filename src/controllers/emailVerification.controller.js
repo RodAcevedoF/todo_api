@@ -2,14 +2,13 @@ import crypto from "crypto";
 import Token from "../models/Token.js";
 import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
-// ✅ Paso 1: crear token y devolverlo al frontend para que lo envíe con EmailJS
 export const requestEmailVerification = async (req, res) => {
   try {
     const userId = req.user.id;
     console.log("🔐 req.user:", req.user);
 
     const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
 
     await Token.createEmailVerification(userId, token, expiresAt);
 
@@ -38,7 +37,7 @@ export const verifyEmail = async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/verify?status=invalid`);
     }
 
-    // ✔️ No importa si ya estaba verificado, lo tratamos como success igual
+    //No importa si ya estaba verificado, success
     await User.update(record.user_id, { is_verified: true });
     await Token.deleteEmailVerification(record.user_id);
 

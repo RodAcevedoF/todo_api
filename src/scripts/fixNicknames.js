@@ -1,4 +1,3 @@
-// fixNicknames.js
 import db from "../config/db.js";
 
 const fixNicknames = async () => {

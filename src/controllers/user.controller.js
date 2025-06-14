@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
-import Token from "../models/Token.js";
+import * as Token from "../models/Token.js";
 import { normalizeUserUpdate } from "../utils/normalizeUserUpdates.js";
 
 export const register = async (req, res) => {
