@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import * as Token from "../models/Token.js";
+import Token from "../models/Token.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
 export const login = async (req, res) => {
