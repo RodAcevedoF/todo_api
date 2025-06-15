@@ -16,6 +16,7 @@ import "./config/validateEnv.js";
 import logger from "./config/logger.js";
 import compression from "compression";
 import helmet from "helmet";
+import basicAuth from "express-basic-auth";
 
 const app = express();
 app.set("trust proxy", "loopback");
@@ -54,7 +55,15 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  basicAuth({
+    users: { admin: process.env.SWAGGER_PASSWORD },
+    challenge: true
+  }),
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 
 app.get("/ping", (req, res) => {
   res.json({ message: "Server is running!" });
