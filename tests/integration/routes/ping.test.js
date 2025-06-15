@@ -1,5 +1,6 @@
 import request from "supertest";
 import app from "../../../index.js";
+import { it, expect, describe } from "vitest";
 
 describe("GET /ping", () => {
   it("should return 200 and a JSON message", async () => {

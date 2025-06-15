@@ -1,3 +1,4 @@
+import { expect, test } from "vitest";
 import { hashToken } from "../../../src/utils/hashToken.js";
 
 test("should hash the token using sha256", () => {

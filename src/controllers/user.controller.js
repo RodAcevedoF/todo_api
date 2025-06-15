@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
-import * as Token from "../models/Token.js";
+import Token from "../models/Token.js";
 import { normalizeUserUpdate } from "../utils/normalizeUserUpdates.js";
 
 export const register = async (req, res) => {
@@ -11,7 +11,10 @@ export const register = async (req, res) => {
   if (!errors.isEmpty()) {
     return errorResponse(
       res,
-      errors.array().map((err) => err.msg),
+      errors
+        .array()
+        .map((err) => err.msg)
+        .join("; "),
       400
     );
   }
@@ -144,58 +147,55 @@ export const getProfile = async (req, res) => {
 };
 
 export const updateSensitiveData = async (req, res) => {
-  // 1) Validaciones de express-validator ya pasaron
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return errorResponse(
       res,
-      errors.array().map((err) => err.msg),
+      errors
+        .array()
+        .map((err) => err.msg)
+        .join("; "),
       400
     );
   }
 
+  const { email, password, currentPassword } = req.body;
+
+  // Validaciones básicas
+  if (!email && !password) {
+    return errorResponse(res, "No fields to update.", 400);
+  }
+
+  if (!currentPassword) {
+    return errorResponse(res, "Current password is required.", 401);
+  }
+
+  if (password && password.length < 8) {
+    return errorResponse(res, "Password must be at least 8 characters.", 400);
+  }
+
+  if (email && !/\S+@\S+\.\S+/.test(email)) {
+    return errorResponse(res, "Invalid email format.", 400);
+  }
+
   try {
-    const { email, password, currentPassword } = req.body;
-
-    // 2) Verificar campos mínimos
-    if (!email && !password) {
-      return errorResponse(res, "No fields to update.", 400);
-    }
-    if (!currentPassword) {
-      return errorResponse(res, "Current password is required.", 400);
-    }
-
-    if (password && password.length < 8) {
-      return errorResponse(res, "Password must be at least 8 characters.", 400);
-    }
-
-    // 3) Validar formato de email
-    if (email && !/\S+@\S+\.\S+/.test(email)) {
-      return errorResponse(res, "Invalid email format.", 400);
-    }
-
-    // 4) Llamar al modelo para actualizar datos sensibles
     const updatedUser = await User.updateSensitiveData(
       req.user.id,
       currentPassword,
       { newEmail: email, newPassword: password }
     );
 
-    // 5) Responder con el usuario actualizado (sin password)
     return successResponse(res, {
       message: "Credentials updated successfully",
       user: updatedUser
     });
   } catch (error) {
     console.error("Error updating sensitive data:", error);
-    // Enviar mensaje de error claro (puedes detectar el error.message específico)
-    return errorResponse(
-      res,
-      error.message === "Incorrect current password"
-        ? "Current password is incorrect."
-        : "Failed to update credentials.",
-      error.message === "Incorrect current password" ? 401 : 500
-    );
+    const message = String(error?.message || "").toLowerCase();
+    if (message.includes("incorrect current password")) {
+      return errorResponse(res, "Current password is incorrect.", 401);
+    }
+    return errorResponse(res, "Failed to update credentials.", 500);
   }
 };
 
@@ -203,9 +203,7 @@ export const uploadProfileImage = async (req, res) => {
   try {
     // Verificamos que el middleware haya asignado ambos datos.
     if (!req.fileUrl || !req.filePublicId) {
-      return res
-        .status(400)
-        .json({ success: false, error: "No image uploaded" });
+      return errorResponse(res, "No image uploaded", 400);
     }
 
     const userId = req.user.id;
@@ -228,6 +226,10 @@ export const uploadProfileImage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating profile image:", error);
-    return res.status(500).json({ success: false, error: error.message });
+    return errorResponse(
+      res,
+      error.message || "Failed to update profile image",
+      500
+    );
   }
 };

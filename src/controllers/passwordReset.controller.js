@@ -3,7 +3,6 @@ import Token from "../models/Token.js";
 import User from "../models/User.js";
 import { successResponse, errorResponse } from "../utils/apiResponse.js";
 
-// ✅ Paso 1: solicitar el reset
 export const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
@@ -11,7 +10,6 @@ export const requestPasswordReset = async (req, res) => {
 
     const user = await User.findByEmail(email.trim().toLowerCase());
     if (!user) {
-      // No decimos si el email existe por seguridad
       return successResponse(res, {
         message: "If the email exists, you will receive instructions."
       });
@@ -32,7 +30,6 @@ export const requestPasswordReset = async (req, res) => {
   }
 };
 
-// ✅ Paso 2: resetear contraseña
 export const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;

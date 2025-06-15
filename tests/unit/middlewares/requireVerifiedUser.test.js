@@ -1,11 +1,12 @@
-import { jest } from "@jest/globals";
+// tests/unit/middlewares/requireVerifiedUser.test.js
+import { describe, it, expect, vi } from "vitest";
 import { requireVerifiedUser } from "../../../src/middlewares/requireVerifiedUser.js";
 
 describe("requireVerifiedUser", () => {
   it("should call next() if user is verified", () => {
     const req = { user: { is_verified: true } };
     const res = {};
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireVerifiedUser(req, res, next);
 
@@ -14,10 +15,10 @@ describe("requireVerifiedUser", () => {
 
   it("should return 403 if user is not verified", () => {
     const req = { user: { is_verified: false } };
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     const res = { status };
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireVerifiedUser(req, res, next);
 
@@ -31,10 +32,10 @@ describe("requireVerifiedUser", () => {
 
   it("should return 403 if user is missing", () => {
     const req = {};
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     const res = { status };
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireVerifiedUser(req, res, next);
 
@@ -48,10 +49,10 @@ describe("requireVerifiedUser", () => {
 
   it("should handle unexpected error and return 500", () => {
     const req = null;
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     const res = { status };
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireVerifiedUser(req, res, next);
 

@@ -1,7 +1,5 @@
 import db from "../config/db.js";
-
 export default class Category {
-  // Crear una nueva categoría
   static async create(name) {
     const query = `INSERT INTO categories (name) VALUES ($1) RETURNING *`;
     const { rows } = await db.query(query, [name]);

@@ -1,11 +1,12 @@
-import { jest } from "@jest/globals";
+// tests/unit/middlewares/requireUnverifiedUser.test.js
+import { describe, it, expect, vi } from "vitest";
 import { requireUnverifiedUser } from "../../../src/middlewares/requireUnverifiedUser.js";
 
 describe("requireUnverifiedUser", () => {
   it("should call next() if user is not verified", () => {
     const req = { user: { is_verified: false } };
     const res = {};
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireUnverifiedUser(req, res, next);
 
@@ -14,10 +15,10 @@ describe("requireUnverifiedUser", () => {
 
   it("should return 403 if user is verified", () => {
     const req = { user: { is_verified: true } };
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     const res = { status };
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireUnverifiedUser(req, res, next);
 
@@ -31,10 +32,10 @@ describe("requireUnverifiedUser", () => {
 
   it("should return 403 if user is missing", () => {
     const req = {};
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     const res = { status };
-    const next = jest.fn();
+    const next = vi.fn();
 
     requireUnverifiedUser(req, res, next);
 

@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { isValidUrl } from "../../../src/utils/isValidUrl.js";
 
 describe("isValidUrl", () => {

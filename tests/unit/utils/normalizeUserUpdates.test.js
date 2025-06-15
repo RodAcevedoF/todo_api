@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { normalizeUserUpdate } from "../../../src/utils/normalizeUserUpdates";
 
 describe("normalizeUserUpdate", () => {

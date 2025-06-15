@@ -75,7 +75,7 @@ export const logout = async (req, res) => {
 export const refreshAccessToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    const userId = req.userId; // viene del middleware
+    const userId = req.userId;
 
     if (!refreshToken || typeof refreshToken !== "string") {
       return errorResponse(res, "Refresh token is missing or invalid.", 400);

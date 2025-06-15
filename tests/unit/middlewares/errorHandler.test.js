@@ -1,18 +1,25 @@
-import { jest } from "@jest/globals";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { errorHandler } from "../../../src/middlewares/errorHandler.js";
 
 describe("errorHandler", () => {
   const createMockRes = () => {
-    const json = jest.fn();
-    const status = jest.fn(() => ({ json }));
+    const json = vi.fn();
+    const status = vi.fn(() => ({ json }));
     return { status, json };
   };
+
+  const originalEnv = process.env.NODE_ENV;
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalEnv;
+    vi.clearAllMocks();
+  });
 
   it("should handle TokenExpiredError", () => {
     const err = { name: "TokenExpiredError" };
     const req = {};
     const res = createMockRes();
-    const next = jest.fn();
+    const next = vi.fn();
 
     errorHandler(err, req, res, next);
 
@@ -28,7 +35,7 @@ describe("errorHandler", () => {
     const req = {};
     const res = createMockRes();
 
-    errorHandler(err, req, res, jest.fn());
+    errorHandler(err, req, res, vi.fn());
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.status().json).toHaveBeenCalledWith({
@@ -42,7 +49,7 @@ describe("errorHandler", () => {
     const req = {};
     const res = createMockRes();
 
-    errorHandler(err, req, res, jest.fn());
+    errorHandler(err, req, res, vi.fn());
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.status().json).toHaveBeenCalledWith({
@@ -58,7 +65,7 @@ describe("errorHandler", () => {
     const req = {};
     const res = createMockRes();
 
-    errorHandler(err, req, res, jest.fn());
+    errorHandler(err, req, res, vi.fn());
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.status().json).toHaveBeenCalledWith({
@@ -75,7 +82,7 @@ describe("errorHandler", () => {
     const req = {};
     const res = createMockRes();
 
-    errorHandler(err, req, res, jest.fn());
+    errorHandler(err, req, res, vi.fn());
 
     expect(res.status).toHaveBeenCalledWith(418);
     expect(res.status().json).toHaveBeenCalledWith({

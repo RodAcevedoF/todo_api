@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Todo API Documentation
+  title: API Documentation
   version: "1.0.0"
-  description: API para gestionar todos, usuarios, libros y más.
+  description: API to manage todos, users, books and more.
   contact:
     name: Rodrigo
     email: raacevedof@gmail.com
 
 servers:
   - url: http://localhost:4000/api
-    description: Servidor local de desarrollo
+    description: Local development server
 
 components:
   securitySchemes:
@@ -17,64 +17,15 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas:
-    Todo:
-      type: object
-      properties:
-        id:
-          type: integer
-        title:
-          type: string
-        completed:
-          type: boolean
-    TodoInput:
-      type: object
-      properties:
-        title:
-          type: string
-        completed:
-          type: boolean
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        email:
-          type: string
 
 security:
   - bearerAuth: []
 
 paths:
-  /auth/register:
-    post:
-      tags: [Auth]
-      summary: Registro de usuario
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-      responses:
-        201:
-          description: Usuario registrado exitosamente
-        400:
-          description: Error de validación
-
   /auth/login:
     post:
       tags: [Auth]
-      summary: Inicio de sesión
+      summary: Log in a user
       requestBody:
         required: true
         content:
@@ -88,33 +39,18 @@ paths:
                   type: string
       responses:
         200:
-          description: Inicio de sesión exitoso con token
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  accessToken:
-                    type: string
-                  refreshToken:
-                    type: string
+          description: Login successful, returns access and refresh tokens
+        400:
+          description: Validation error
         401:
-          description: Credenciales incorrectas
+          description: Invalid credentials
 
   /auth/logout:
     post:
       tags: [Auth]
-      summary: Cerrar sesión
+      summary: Log out the current user
       security:
         - bearerAuth: []
-      responses:
-        200:
-          description: Sesión cerrada exitosamente
-
-  /auth/refresh:
-    post:
-      tags: [Auth]
-      summary: Refrescar token de acceso
       requestBody:
         required: true
         content:
@@ -126,35 +62,14 @@ paths:
                   type: string
       responses:
         200:
-          description: Nuevo token de acceso generado
-        403:
-          description: Token de refresh inválido
+          description: Logout successful
+        400:
+          description: Token missing or already invalidated
 
-  /auth/profile:
-    get:
+  /auth/refresh:
+    post:
       tags: [Auth]
-      summary: Obtener perfil del usuario autenticado
-      security:
-        - bearerAuth: []
-      responses:
-        200:
-          description: Perfil del usuario
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  name:
-                    type: string
-                  email:
-                    type: string
-    put:
-      tags: [Auth]
-      summary: Actualizar perfil del usuario
-      security:
-        - bearerAuth: []
+      summary: Refresh the access token using a valid refresh token
       requestBody:
         required: true
         content:
@@ -162,96 +77,32 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
+                refreshToken:
                   type: string
       responses:
         200:
-          description: Perfil actualizado exitosamente
+          description: New access and refresh tokens issued
         400:
-          description: Error de validación
+          description: Missing or invalid refresh token
+        500:
+          description: Server error
 
-  /todos:
+  /auth/ping:
     get:
-      tags: [Todos]
-      summary: Obtener todos del usuario autenticado
+      tags: [Auth]
+      summary: Check if the access token is valid
+      security:
+        - bearerAuth: []
       responses:
         200:
-          description: Lista de todos
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Todo"
-    post:
-      tags: [Todos]
-      summary: Crear un nuevo todo
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TodoInput"
-      responses:
-        201:
-          description: Todo creado exitosamente
-
-  /todos/{id}:
-    get:
-      tags: [Todos]
-      summary: Obtener un todo por ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        200:
-          description: Todo encontrado
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todo"
-    put:
-      tags: [Todos]
-      summary: Actualizar un todo
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TodoInput"
-      responses:
-        200:
-          description: Todo actualizado
-    delete:
-      tags: [Todos]
-      summary: Eliminar un todo
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        204:
-          description: Todo eliminado
+          description: Token is valid
+        401:
+          description: Unauthorized
 
   /books:
     post:
       tags: [Books]
-      summary: Crear un nuevo libro
+      summary: Create a new book
       security:
         - bearerAuth: []
       requestBody:
@@ -261,15 +112,15 @@ paths:
             schema:
               type: object
               properties:
-                cover_image:
-                  type: string
-                  format: binary
                 title:
                   type: string
                 author:
                   type: string
-                notes:
+                pages:
+                  type: integer
+                cover_image:
                   type: string
+                  format: binary
                 isbn:
                   type: string
                 description:
@@ -279,68 +130,71 @@ paths:
                 publish_date:
                   type: string
                   format: date
-                pages:
-                  type: integer
+                categories:
+                  type: array
+                  items:
+                    type: integer
                 checked:
                   type: boolean
       responses:
         201:
-          description: Libro creado exitosamente
+          description: Book successfully created
         400:
-          description: Error de validación
+          description: Validation error or failed to create
 
     get:
       tags: [Books]
-      summary: Obtener lista de libros
+      summary: Get a list of books for the authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          required: false
       responses:
         200:
-          description: Lista de libros disponibles
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    title:
-                      type: string
-                    author:
-                      type: string
-                    cover_image:
-                      type: string
-                      format: uri
+          description: List of books returned
+        500:
+          description: Server error
 
   /books/{id}:
     delete:
       tags: [Books]
-      summary: Eliminar un libro
+      summary: Delete a book by ID
       security:
         - bearerAuth: []
       parameters:
         - in: path
           name: id
-          required: true
           schema:
             type: integer
+          required: true
       responses:
         204:
-          description: Libro eliminado exitosamente
+          description: Book deleted successfully
         404:
-          description: Libro no encontrado
+          description: Book not found
+        500:
+          description: Server error
 
     patch:
       tags: [Books]
-      summary: Actualizar un libro
+      summary: Update a book by ID
       security:
         - bearerAuth: []
       parameters:
         - in: path
           name: id
-          required: true
           schema:
             type: integer
+          required: true
       requestBody:
         required: true
         content:
@@ -348,15 +202,15 @@ paths:
             schema:
               type: object
               properties:
-                cover_image:
-                  type: string
-                  format: binary
                 title:
                   type: string
                 author:
                   type: string
-                notes:
+                pages:
+                  type: integer
+                cover_image:
                   type: string
+                  format: binary
                 isbn:
                   type: string
                 description:
@@ -366,209 +220,25 @@ paths:
                 publish_date:
                   type: string
                   format: date
-                pages:
-                  type: integer
+                categories:
+                  type: array
+                  items:
+                    type: integer
                 checked:
                   type: boolean
       responses:
         200:
-          description: Libro actualizado exitosamente
+          description: Book updated successfully
         400:
-          description: Error de validación
-
-  /videos:
-    post:
-      tags: [Videos]
-      summary: Crear un nuevo video
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                video_id:
-                  type: string
-                  description: ID del video
-                title:
-                  type: string
-                  description: Título del video
-                channel:
-                  type: string
-                  description: Canal de origen del video
-                channelId:
-                  type: string
-                  description: ID del canal (opcional)
-                notes:
-                  type: string
-                  description: Notas sobre el video (opcional)
-                description:
-                  type: string
-                  description: Descripción del video (opcional)
-                created_at:
-                  type: string
-                  format: date-time
-                  description: Fecha de creación del video (opcional)
-                views:
-                  type: integer
-                  minimum: 0
-                  description: Número de vistas (opcional)
-                duration_seconds:
-                  type: integer
-                  minimum: 0
-                  description: Duración del video en segundos (opcional)
-                checked:
-                  type: boolean
-                  description: Estado de revisión del video (opcional)
-                thumbnail:
-                  type: string
-                  format: binary
-                  description: Imagen en miniatura del video (opcional)
-      responses:
-        201:
-          description: Video creado exitosamente
-        400:
-          description: Error de validación
-
-    get:
-      tags: [Videos]
-      summary: Obtener lista de videos
-      responses:
-        200:
-          description: Lista de videos disponibles
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    video_id:
-                      type: string
-                    title:
-                      type: string
-                    channel:
-                      type: string
-                    thumbnail:
-                      type: string
-                      format: uri
-
-  /videos/{id}:
-    delete:
-      tags: [Videos]
-      summary: Eliminar un video
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        204:
-          description: Video eliminado exitosamente
+          description: Invalid input or no fields provided
         404:
-          description: Video no encontrado
-
-    patch:
-      tags: [Videos]
-      summary: Actualizar un video
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                  description: Título del video (opcional)
-                channel:
-                  type: string
-                  description: Canal del video (opcional)
-                channelId:
-                  type: string
-                  description: ID del canal (opcional)
-                notes:
-                  type: string
-                  description: Notas sobre el video (opcional)
-                description:
-                  type: string
-                  description: Descripción del video (opcional)
-                created_at:
-                  type: string
-                  format: date-time
-                  description: Fecha de creación del video (opcional)
-                views:
-                  type: integer
-                  minimum: 0
-                  description: Número de vistas (opcional)
-                duration_seconds:
-                  type: integer
-                  minimum: 0
-                  description: Duración del video en segundos (opcional)
-                checked:
-                  type: boolean
-                  description: Estado de revisión del video (opcional)
-                thumbnail:
-                  type: string
-                  format: binary
-                  description: Imagen en miniatura (opcional)
-      responses:
-        200:
-          description: Video actualizado exitosamente
-        400:
-          description: Error de validación
-        404:
-          description: Video no encontrado
-
-  /dashboard:
-    get:
-      tags: [Dashboard]
-      summary: Obtener información del dashboard
-      security:
-        - bearerAuth: []
-      responses:
-        200:
-          description: Información del dashboard obtenida exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  todos:
-                    type: integer
-                    description: Número total de "todos" del usuario
-                  books:
-                    type: integer
-                    description: Número total de libros del usuario
-                  videos:
-                    type: integer
-                    description: Número total de videos del usuario
-                  connection_time:
-                    type: string
-                    format: date-time
-                    description: Tiempo de conexión del usuario
-        401:
-          description: No autorizado, se requiere autenticación
-
+          description: Book not found
+        500:
+          description: Server error
   /categories:
     post:
       tags: [Categories]
-      summary: Crear una nueva categoría
+      summary: Create a new category
       security:
         - bearerAuth: []
       requestBody:
@@ -580,35 +250,27 @@ paths:
               properties:
                 name:
                   type: string
-                  description: Nombre de la categoría
       responses:
         201:
-          description: Categoría creada exitosamente
+          description: Category successfully created
         400:
-          description: Error de validación
+          description: Validation error
 
     get:
       tags: [Categories]
-      summary: Obtener todas las categorías
+      summary: Get all categories
+      security:
+        - bearerAuth: []
       responses:
         200:
-          description: Lista de categorías disponibles
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    name:
-                      type: string
+          description: List of categories returned
+        500:
+          description: Server error
 
   /categories/books/{bookId}:
     post:
       tags: [Categories]
-      summary: Asociar categorías a un libro
+      summary: Associate categories with a book
       security:
         - bearerAuth: []
       parameters:
@@ -627,12 +289,464 @@ paths:
                 categories:
                   type: array
                   items:
-                    type: string
-                  description: Lista de categorías a asociar con el libro
+                    type: integer
+      responses:
+        201:
+          description: Categories successfully associated
+        400:
+          description: Invalid request or no categories provided
+        500:
+          description: Server error
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Get user dashboard information
+      security:
+        - bearerAuth: []
       responses:
         200:
-          description: Categorías asociadas al libro exitosamente
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      todo:
+                        type: object
+                        properties:
+                          lastTodoActivity:
+                            type: string
+                            format: date-time
+                            nullable: true
+                          lastTodoTitle:
+                            type: string
+                            nullable: true
+                      book:
+                        type: object
+                        properties:
+                          lastBookActivity:
+                            type: string
+                            format: date-time
+                            nullable: true
+                          lastBookTitle:
+                            type: string
+                            nullable: true
+                      video:
+                        type: object
+                        properties:
+                          lastVideoActivity:
+                            type: string
+                            format: date-time
+                            nullable: true
+                          lastVideoTitle:
+                            type: string
+                            nullable: true
+                      lastLogin:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      counts:
+                        type: object
+                        properties:
+                          todos:
+                            type: integer
+                          books:
+                            type: integer
+                          videos:
+                            type: integer
+        500:
+          description: Failed to load dashboard info
+  /todos:
+    post:
+      tags: [Todos]
+      summary: Create a new todo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                deadline:
+                  type: string
+                  format: date
+                priority:
+                  type: string
+                  enum: [low, medium, high]
+                checked:
+                  type: boolean
+      responses:
+        201:
+          description: Todo created successfully
         400:
-          description: Error de validación
+          description: Validation error or bad request
+
+    get:
+      tags: [Todos]
+      summary: Get list of todos for the authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of todos retrieved successfully
+        500:
+          description: Server error
+
+  /todos/{id}:
+    put:
+      tags: [Todos]
+      summary: Update a todo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                deadline:
+                  type: string
+                  format: date
+                priority:
+                  type: string
+                  enum: [low, medium, high]
+                checked:
+                  type: boolean
+      responses:
+        200:
+          description: Todo updated successfully
+        400:
+          description: Validation error
         404:
-          description: Libro no encontrado
+          description: Todo not found
+
+    delete:
+      tags: [Todos]
+      summary: Delete a todo
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Todo deleted successfully
+        404:
+          description: Todo not found
+        500:
+          description: Server error
+  /users/register:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        201:
+          description: User registered successfully
+        400:
+          description: Validation error
+
+  /users/profile:
+    get:
+      tags: [Users]
+      summary: Get user profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User profile data
+        401:
+          description: Unauthorized
+
+    put:
+      tags: [Users]
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                nickname:
+                  type: string
+      responses:
+        200:
+          description: Profile updated successfully
+        400:
+          description: Validation error
+
+  /users/credentials:
+    put:
+      tags: [Users]
+      summary: Update sensitive user data (email or password)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: Sensitive data updated
+        400:
+          description: Validation error
+
+  /users/profile-image:
+    post:
+      tags: [Users]
+      summary: Upload profile image
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: Image uploaded successfully
+        400:
+          description: Upload error
+
+  /users/delete:
+    delete:
+      tags: [Users]
+      summary: Delete user account
+      security:
+        - bearerAuth: []
+      responses:
+        204:
+          description: User deleted successfully
+        401:
+          description: Unauthorized
+  /utils/verify:
+    get:
+      tags: [Utils]
+      summary: Verify email using token
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        302:
+          description: Redirects to frontend with verification status
+
+  /utils/verify/request:
+    post:
+      tags: [Utils]
+      summary: Request email verification token
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Verification token generated
+        401:
+          description: Unauthorized or already verified
+
+  /utils/password/reset/request:
+    post:
+      tags: [Utils]
+      summary: Request password reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        200:
+          description: Reset instructions sent if email exists
+        400:
+          description: Email is required
+
+  /utils/password/reset:
+    post:
+      tags: [Utils]
+      summary: Reset password using token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: Password reset successful
+        400:
+          description: Invalid or expired token
+  /videos:
+    post:
+      tags: [Videos]
+      summary: Create a new video
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                url:
+                  type: string
+                thumbnail:
+                  type: string
+                  format: binary
+                description:
+                  type: string
+                checked:
+                  type: boolean
+      responses:
+        201:
+          description: Video created successfully
+        400:
+          description: Validation error or bad input
+
+    get:
+      tags: [Videos]
+      summary: Get videos for authenticated user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of videos
+
+  /videos/{id}:
+    delete:
+      tags: [Videos]
+      summary: Delete a video by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Video deleted successfully
+        404:
+          description: Video not found
+
+    patch:
+      tags: [Videos]
+      summary: Update a video by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                url:
+                  type: string
+                thumbnail:
+                  type: string
+                  format: binary
+                description:
+                  type: string
+                checked:
+                  type: boolean
+      responses:
+        200:
+          description: Video updated successfully
+        404:
+          description: Video not found

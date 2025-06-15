@@ -6,10 +6,14 @@ import { successResponse, errorResponse } from "../utils/apiResponse.js";
 export const createTodo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      error: errors.array().map((err) => err.msg)
-    });
+    return errorResponse(
+      res,
+      errors
+        .array()
+        .map((err) => err.msg)
+        .join("; "),
+      400
+    );
   }
 
   try {
@@ -19,7 +23,7 @@ export const createTodo = async (req, res) => {
       deadline,
       priority,
       checked = false
-    } = req.body; // Si no hay archivo, fileUrl será null
+    } = req.body;
 
     const newTodo = await Todo.create(req.user.id, {
       title,
@@ -29,24 +33,23 @@ export const createTodo = async (req, res) => {
       checked
     });
 
-    res.status(201).json({
-      success: true,
-      data: newTodo
-    });
+    return successResponse(res, newTodo, 201);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    return errorResponse(res, error.message, 400);
   }
 };
+
 export const updateTodo = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      error: errors.array().map((err) => err.msg)
-    });
+    return errorResponse(
+      res,
+      errors
+        .array()
+        .map((err) => err.msg)
+        .join("; "),
+      400
+    );
   }
 
   try {
@@ -54,24 +57,16 @@ export const updateTodo = async (req, res) => {
     if ("checked" in updates) {
       updates.checked = updates.checked === "true" || updates.checked === true;
     }
+
     const updatedTodo = await Todo.update(req.params.id, req.user.id, updates);
 
     if (!updatedTodo) {
-      return res.status(404).json({
-        success: false,
-        error: "Todo not found"
-      });
+      return errorResponse(res, "Todo not found", 404);
     }
 
-    res.json({
-      success: true,
-      data: updatedTodo
-    });
+    return successResponse(res, updatedTodo);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message
-    });
+    return errorResponse(res, error.message, 400);
   }
 };
 
@@ -94,14 +89,8 @@ export const getTodos = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset) || 0;
     const todos = await Todo.findByUser(req.user.id, limit, offset);
-    res.json({
-      success: true,
-      data: todos
-    });
+    return successResponse(res, todos);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return errorResponse(res, error.message, 500);
   }
 };

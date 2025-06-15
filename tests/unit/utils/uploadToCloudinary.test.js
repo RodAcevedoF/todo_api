@@ -1,30 +1,31 @@
-import { jest } from "@jest/globals";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-jest.unstable_mockModule("streamifier", () => ({
+// Mocks de dependencias externas
+vi.mock("streamifier", () => ({
   default: {
-    createReadStream: jest.fn()
+    createReadStream: vi.fn()
   }
 }));
 
-jest.unstable_mockModule("../../../src/config/cloudinary.js", () => ({
+vi.mock("../../../src/config/cloudinary.js", () => ({
   default: {
     uploader: {
-      upload_stream: jest.fn()
+      upload_stream: vi.fn()
     }
   }
 }));
 
-const { uploadToCloudinary } = await import(
-  "../../../src/utils/uploadToCloudinary.js"
-);
-const { default: streamifier } = await import("streamifier");
-const { default: cloudinary } = await import(
-  "../../../src/config/cloudinary.js"
-);
+import { uploadToCloudinary } from "../../../src/utils/uploadToCloudinary.js";
+import streamifier from "streamifier";
+import cloudinary from "../../../src/config/cloudinary.js";
 
 describe("uploadToCloudinary", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("should resolve with result from cloudinary", async () => {
-    const mockStream = { pipe: jest.fn() };
+    const mockStream = { pipe: vi.fn() };
     const fileBuffer = Buffer.from("fake image");
 
     streamifier.createReadStream.mockReturnValue(mockStream);
@@ -44,7 +45,7 @@ describe("uploadToCloudinary", () => {
 
   it("should reject if cloudinary returns an error", async () => {
     const fileBuffer = Buffer.from("bad image");
-    const mockStream = { pipe: jest.fn() };
+    const mockStream = { pipe: vi.fn() };
 
     streamifier.createReadStream.mockReturnValue(mockStream);
 
