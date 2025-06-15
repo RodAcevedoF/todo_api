@@ -14,7 +14,7 @@ export const bookCreationValidator = [
     .isString()
     .withMessage("Publisher must be text"),
   check("publish_date")
-    .optional()
+    .optional({ nullable: true })
     .isISO8601()
     .withMessage("Publish date must be valid"),
   check("pages")
