@@ -26,7 +26,7 @@ const allowedOrigins = [
   "http://localhost:5175",
   "http://localhost:5174",
   "https://service.todo-api.site",
-  "getdoneapp.vercel.app"
+  "https://getdoneapp.vercel.app/"
 ];
 
 app.use(
